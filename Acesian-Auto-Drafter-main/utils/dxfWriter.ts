@@ -35,100 +35,106 @@ const ROW_H = H_ITEMS / 3; // 65
 /**
  * Dependency-free DXF Writer class.
  */
-class DxfWriter {
-  private content: string[] = [];
+export class DxfWriter {
+    private content: string[] = [];
 
-  constructor() {
-    this.header();
-  }
+    constructor() {
+        this.header();
+    }
 
-  private header() {
-    this.content.push(
-      "  0", "SECTION",
-      "  2", "HEADER",
-      "  9", "$ACADVER", "  1", "AC1009",
-      "  9", "$INSUNITS", " 70", "4", // 4 = Millimeters
-      "  0", "ENDSEC",
-      "  0", "SECTION",
-      "  2", "ENTITIES"
-    );
-  }
-
-  public addLine(x1: number, y1: number, x2: number, y2: number, layer: string = "0", color: number = 7) {
-    this.content.push(
-      "  0", "LINE",
-      "  8", layer,
-      " 62", color.toString(),
-      " 10", x1.toFixed(3), " 20", y1.toFixed(3),
-      " 11", x2.toFixed(3), " 21", y2.toFixed(3)
-    );
-  }
-
-  public addRect(x: number, y: number, w: number, h: number, layer: string = "0", color: number = 7) {
-    this.addPolyline([
-        {x, y}, {x: x+w, y}, {x: x+w, y: y+h}, {x, y: y+h}
-    ], true, layer, color);
-  }
-
-  public addCircle(cx: number, cy: number, r: number, layer: string = "0", color: number = 7) {
-    this.content.push(
-      "  0", "CIRCLE",
-      "  8", layer,
-      " 62", color.toString(),
-      " 10", cx.toFixed(3), " 20", cy.toFixed(3),
-      " 40", r.toFixed(3)
-    );
-  }
-
-  public addText(
-    x: number, y: number, text: string, height: number, 
-    layer: string = "TEXT", color: number = 7, 
-    align: 'left'|'center'|'right' = 'left', rotation: number = 0
-  ) {
-    // Basic DXF Text Alignment (Group 72): 0=Left, 1=Center, 2=Right
-    let alignCode = 0;
-    if (align === 'center') alignCode = 1;
-    if (align === 'right') alignCode = 2;
-
-    this.content.push(
-      "  0", "TEXT",
-      "  8", layer,
-      " 62", color.toString(),
-      " 10", x.toFixed(3), " 20", y.toFixed(3),
-      " 40", height.toFixed(3),
-      "  1", text,
-      " 50", rotation.toFixed(3)
-    );
-    
-    // For alignment to work in basic DXF readers, 11/21 coords must match 10/20 when aligned
-    if (alignCode !== 0) {
+    private header() {
         this.content.push(
-            " 72", alignCode.toString(),
-            " 11", x.toFixed(3), " 21", y.toFixed(3)
+            "  0", "SECTION",
+            "  2", "HEADER",
+            "  9", "$ACADVER", "  1", "AC1009",
+            "  9", "$INSUNITS", " 70", "4", // 4 = Millimeters
+            "  0", "ENDSEC",
+            "  0", "SECTION",
+            "  2", "ENTITIES"
         );
     }
-  }
-  
-  public addPolyline(points: {x: number, y: number}[], isClosed: boolean = false, layer: string = "0", color: number = 7) {
-    if (points.length < 2) return;
-    this.content.push(
-      "  0", "LWPOLYLINE",
-      "  8", layer,
-      " 62", color.toString(),
-      "100", "AcDbEntity",
-      "100", "AcDbPolyline",
-      " 90", points.length.toString(),
-      " 70", isClosed ? "1" : "0"
-    );
-    points.forEach(p => {
-      this.content.push(" 10", p.x.toFixed(3), " 20", p.y.toFixed(3));
-    });
-  }
 
-  public toDxfString(): string {
-    this.content.push("  0", "ENDSEC", "  0", "EOF");
-    return this.content.join("\n");
-  }
+    public addLine(x1: number, y1: number, x2: number, y2: number, layer: string = "0", color: number = 7) {
+        this.content.push(
+            "  0", "LINE",
+            "  8", layer,
+            " 62", color.toString(),
+            "100", "AcDbEntity",
+            "100", "AcDbLine",
+            " 10", x1.toFixed(3), " 20", y1.toFixed(3),
+            " 11", x2.toFixed(3), " 21", y2.toFixed(3)
+        );
+    }
+
+    public addRect(x: number, y: number, w: number, h: number, layer: string = "0", color: number = 7) {
+        this.addPolyline([
+            { x, y }, { x: x + w, y }, { x: x + w, y: y + h }, { x, y: y + h }
+        ], true, layer, color);
+    }
+
+    public addCircle(cx: number, cy: number, r: number, layer: string = "0", color: number = 7) {
+        this.content.push(
+            "  0", "CIRCLE",
+            "  8", layer,
+            " 62", color.toString(),
+            "100", "AcDbEntity",
+            "100", "AcDbCircle",
+            " 10", cx.toFixed(3), " 20", cy.toFixed(3),
+            " 40", r.toFixed(3)
+        );
+    }
+
+    public addText(
+        x: number, y: number, text: string, height: number,
+        layer: string = "TEXT", color: number = 7,
+        align: 'left' | 'center' | 'right' = 'left', rotation: number = 0
+    ) {
+        // Basic DXF Text Alignment (Group 72): 0=Left, 1=Center, 2=Right
+        let alignCode = 0;
+        if (align === 'center') alignCode = 1;
+        if (align === 'right') alignCode = 2;
+
+        this.content.push(
+            "  0", "TEXT",
+            "  8", layer,
+            " 62", color.toString(),
+            "100", "AcDbEntity",
+            "100", "AcDbText",
+            " 10", x.toFixed(3), " 20", y.toFixed(3),
+            " 40", height.toFixed(3),
+            "  1", text,
+            " 50", rotation.toFixed(3)
+        );
+
+        // For alignment to work in basic DXF readers, 11/21 coords must match 10/20 when aligned
+        if (alignCode !== 0) {
+            this.content.push(
+                " 72", alignCode.toString(),
+                " 11", x.toFixed(3), " 21", y.toFixed(3)
+            );
+        }
+    }
+
+    public addPolyline(points: { x: number, y: number }[], isClosed: boolean = false, layer: string = "0", color: number = 7) {
+        if (points.length < 2) return;
+        this.content.push(
+            "  0", "LWPOLYLINE",
+            "  8", layer,
+            " 62", color.toString(),
+            "100", "AcDbEntity",
+            "100", "AcDbPolyline",
+            " 90", points.length.toString(),
+            " 70", isClosed ? "1" : "0"
+        );
+        points.forEach(p => {
+            this.content.push(" 10", p.x.toFixed(3), " 20", p.y.toFixed(3));
+        });
+    }
+
+    public toDxfString(): string {
+        this.content.push("  0", "ENDSEC", "  0", "EOF");
+        return this.content.join("\n");
+    }
 }
 
 // --- Layout Logic ---
@@ -138,8 +144,8 @@ class DxfWriter {
  */
 const drawPageTemplate = (writer: DxfWriter, ox: number, oy: number, header: OrderHeader, pageNum: number, totalPages: number) => {
     const colorFrame = 7; // White/Black
-    const colorText = 7; 
-    
+    const colorText = 7;
+
     // 1. Outer Border
     writer.addRect(ox + CONTENT_L, oy + CONTENT_B, CONTENT_W, CONTENT_H, "FRAME", colorFrame);
 
@@ -155,7 +161,7 @@ const drawPageTemplate = (writer: DxfWriter, ox: number, oy: number, header: Ord
     // Left Placeholder (Acesian Logo)
     writer.addRect(ox + CONTENT_L + 2, oy + Y_HEADER_START + 4, 25, 22, "LOGO", 3); // Green box
     writer.addText(ox + CONTENT_L + 14.5, oy + Y_HEADER_START + 15, "LOGO", 4, "LOGO", 3, 'center');
-    
+
     // Company Text (Center)
     const cx = ox + CONTENT_L + CONTENT_W / 2;
     const cyHead = oy + Y_HEADER_START;
@@ -185,7 +191,7 @@ const drawPageTemplate = (writer: DxfWriter, ox: number, oy: number, header: Ord
         oy + Y_INFO_START + 12,
         oy + Y_INFO_START // Bottom
     ];
-    
+
     // Draw horizontal lines for Info Table
     rowY.forEach(y => writer.addLine(ox + CONTENT_L, y, ox + CONTENT_R, y, "FRAME", colorFrame));
 
@@ -194,7 +200,7 @@ const drawPageTemplate = (writer: DxfWriter, ox: number, oy: number, header: Ord
     const x1 = ox + CONTENT_L + 25;
     const x2 = x1 + 55;  // 80mm from left
     const x3 = x2 + 25;  // 105mm from left
-    
+
     // Draw main verticals covering all rows
     writer.addLine(x1, oy + Y_HEADER_START, x1, oy + Y_INFO_START, "FRAME", colorFrame);
     writer.addLine(x2, oy + Y_HEADER_START, x2, oy + Y_INFO_START, "FRAME", colorFrame);
@@ -210,16 +216,16 @@ const drawPageTemplate = (writer: DxfWriter, ox: number, oy: number, header: Ord
         writer.addText(x1 + 2, y, val1, h, "TEXT", colorText);
         // Col 3 (L: 25mm)
         writer.addText(x2 + 2, y, label2 + ":", h, "LABEL", colorText);
-        
+
         if (label3 && val3) {
             // 3-Column Layout: Col 4 (30mm), Col 5 (30mm), Col 6 (25mm)
             const x4 = x3 + 30; // 135mm from left
             const x5 = x4 + 30; // 165mm from left
-            
+
             // Draw row-specific vertical dividers
-            writer.addLine(x4, rowY[row+1], x4, rowY[row], "FRAME", colorFrame);
-            writer.addLine(x5, rowY[row+1], x5, rowY[row], "FRAME", colorFrame);
-            
+            writer.addLine(x4, rowY[row + 1], x4, rowY[row], "FRAME", colorFrame);
+            writer.addLine(x5, rowY[row + 1], x5, rowY[row], "FRAME", colorFrame);
+
             // Col 4 (V: 30mm)
             writer.addText(x3 + 2, y, val2, h, "TEXT", colorText);
             // Col 5 (L: 30mm)
@@ -237,22 +243,22 @@ const drawPageTemplate = (writer: DxfWriter, ox: number, oy: number, header: Ord
     addField(2, "Project", header.project, "Prepared By", header.preparedBy);
     addField(3, "Date", header.date, "Person in Charge", header.personInCharge);
     addField(4, "Lateral No", header.lateralNo, "Customer Ref", header.customerRef);
-    
+
     // Last Row (Address - Taller)
     const yAddr = rowY[5] + 8;
     writer.addText(ox + CONTENT_L + 2, yAddr, "Req Date:", 2.5, "LABEL", colorText);
     writer.addText(x1 + 2, yAddr, header.requiredDate, 2.5, "TEXT", colorText);
     writer.addText(x2 + 2, yAddr, "Address:", 2.5, "LABEL", colorText);
     writer.addText(x3 + 2, yAddr, header.deliveryAddress.substring(0, 60), 2.5, "TEXT", colorText);
-    
+
     // 5. Item Grid Lines
     // Vertical Center Line
     writer.addLine(ox + CONTENT_L + COL_W, oy + Y_ITEMS_START, ox + CONTENT_L + COL_W, oy + Y_ITEMS_END, "FRAME", colorFrame);
-    
+
     // Horizontal Dividers (3 Rows)
     const yR1 = oy + Y_ITEMS_START - ROW_H;
     const yR2 = yR1 - ROW_H;
-    
+
     writer.addLine(ox + CONTENT_L, yR1, ox + CONTENT_R, yR1, "FRAME", colorFrame);
     writer.addLine(ox + CONTENT_L, yR2, ox + CONTENT_R, yR2, "FRAME", colorFrame);
 
@@ -267,12 +273,12 @@ const drawItem = (writer: DxfWriter, ox: number, oy: number, item: OrderItem, sl
     // Slot 0-5
     const row = Math.floor(slotIdx / 2);
     const col = slotIdx % 2;
-    
+
     // Coordinates of Cell Top-Left
     const cellX = ox + CONTENT_L + (col * COL_W);
     const cellY = oy + Y_ITEMS_START - (row * ROW_H); // Top Y of cell
     const cellW = COL_W;
-    
+
     // Updated Grid Layout (3-Row Header)
     const yRow1 = cellY - 5;
     const yRow2 = cellY - 10;
@@ -298,8 +304,8 @@ const drawItem = (writer: DxfWriter, ox: number, oy: number, item: OrderItem, sl
     const wR2C1 = cellW * 0.20;
     const wR2C2 = cellW * 0.20;
     const wR2C3 = cellW * 0.20;
-    
-    let cx = cellX + wR2C1; 
+
+    let cx = cellX + wR2C1;
     writer.addLine(cx, yRow1, cx, yRow2, "FRAME", colorLine);
     cx += wR2C2;
     writer.addLine(cx, yRow1, cx, yRow2, "FRAME", colorLine);
@@ -327,7 +333,7 @@ const drawItem = (writer: DxfWriter, ox: number, oy: number, item: OrderItem, sl
     if (item.sketchSvg) {
         const sketchH = 45;
         const sketchW = cellW - 4; // Margin
-        const targetCx = cellX + cellW/2;
+        const targetCx = cellX + cellW / 2;
         const targetCy = (yRow3 + yNote) / 2;
         addSvgToDxf(writer, item.sketchSvg, targetCx, targetCy, sketchW, sketchH);
     }
@@ -336,11 +342,11 @@ const drawItem = (writer: DxfWriter, ox: number, oy: number, item: OrderItem, sl
 /**
  * Parses SVG string and adds entities to DXF writer, scaled and centered in target box.
  */
-const addSvgToDxf = (writer: DxfWriter, svgString: string, tx: number, ty: number, maxW: number, maxH: number) => {
+export const addSvgToDxf = (writer: DxfWriter, svgString: string, tx: number, ty: number, maxW: number, maxH: number) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(svgString, "image/svg+xml");
     const svgEl = doc.documentElement;
-    
+
     // 1. Get ViewBox
     let vbW = 500, vbH = 500;
     const viewBox = svgEl.getAttribute("viewBox");
@@ -351,7 +357,7 @@ const addSvgToDxf = (writer: DxfWriter, svgString: string, tx: number, ty: numbe
             vbH = parts[3];
         }
     }
-    
+
     // 2. Calculate Scale
     const scaleX = maxW / vbW;
     const scaleY = maxH / vbH;
@@ -360,93 +366,93 @@ const addSvgToDxf = (writer: DxfWriter, svgString: string, tx: number, ty: numbe
     // 3. Transform Helper
     const transformPt = (x: number, y: number) => {
         return {
-            x: tx + (x - vbW/2) * scale,
-            y: ty - (y - vbH/2) * scale
+            x: tx + (x - vbW / 2) * scale,
+            y: ty - (y - vbH / 2) * scale
         };
     };
 
-    const processElement = (el: Element, parentTransform = {rotate:0, cx:0, cy:0}) => {
-         let rot = 0;
-         let cx = 0, cy = 0;
-         const tf = el.getAttribute("transform");
-         if (tf && tf.includes("rotate")) {
-             const m = /rotate\(([^,]+),\s*([^,]+),\s*([^)]+)\)/.exec(tf);
-             if (m) {
-                 rot = parseFloat(m[1]);
-                 cx = parseFloat(m[2]);
-                 cy = parseFloat(m[3]);
-             } else {
-                 const m2 = /rotate\(([^)]+)\)/.exec(tf);
-                 if(m2) rot = parseFloat(m2[1]);
-             }
-         }
+    const processElement = (el: Element, parentTransform = { rotate: 0, cx: 0, cy: 0 }) => {
+        let rot = 0;
+        let cx = 0, cy = 0;
+        const tf = el.getAttribute("transform");
+        if (tf && tf.includes("rotate")) {
+            const m = /rotate\(([^,]+),\s*([^,]+),\s*([^)]+)\)/.exec(tf);
+            if (m) {
+                rot = parseFloat(m[1]);
+                cx = parseFloat(m[2]);
+                cy = parseFloat(m[3]);
+            } else {
+                const m2 = /rotate\(([^)]+)\)/.exec(tf);
+                if (m2) rot = parseFloat(m2[1]);
+            }
+        }
 
-         const applyLocal = (x: number, y: number) => {
-             if (rot !== 0) {
-                 const rad = rot * Math.PI / 180;
-                 const dx = x - cx;
-                 const dy = y - cy;
-                 return {
-                     x: cx + dx*Math.cos(rad) - dy*Math.sin(rad),
-                     y: cy + dx*Math.sin(rad) + dy*Math.cos(rad)
-                 };
-             }
-             return {x, y};
-         };
+        const applyLocal = (x: number, y: number) => {
+            if (rot !== 0) {
+                const rad = rot * Math.PI / 180;
+                const dx = x - cx;
+                const dy = y - cy;
+                return {
+                    x: cx + dx * Math.cos(rad) - dy * Math.sin(rad),
+                    y: cy + dx * Math.sin(rad) + dy * Math.cos(rad)
+                };
+            }
+            return { x, y };
+        };
 
-         const tag = el.tagName.toLowerCase();
-         const getLayer = (e: Element) => {
-             const c = e.getAttribute("class") || "";
-             if (c.includes("dim")) return "DIMENSIONS";
-             if (c.includes("phantom") || c.includes("center") || c.includes("hidden")) return "CONSTRUCTION";
-             if (c.includes("flange")) return "FLANGES";
-             return "OBJECT";
-         };
-         const getColor = (e: Element) => {
-             const c = e.getAttribute("class") || "";
-             if (c.includes("dim")) return 1; // Red
-             if (c.includes("phantom") || c.includes("hidden")) return 8; // Gray
-             return 7; // White
-         };
+        const tag = el.tagName.toLowerCase();
+        const getLayer = (e: Element) => {
+            const c = e.getAttribute("class") || "";
+            if (c.includes("dim")) return "DIMENSIONS";
+            if (c.includes("phantom") || c.includes("center") || c.includes("hidden")) return "CONSTRUCTION";
+            if (c.includes("flange")) return "FLANGES";
+            return "OBJECT";
+        };
+        const getColor = (e: Element) => {
+            const c = e.getAttribute("class") || "";
+            if (c.includes("dim")) return 1; // Red
+            if (c.includes("phantom") || c.includes("hidden")) return 8; // Gray
+            return 7; // White
+        };
 
-         if (tag === "line") {
-             const x1 = parseFloat(el.getAttribute("x1") || "0");
-             const y1 = parseFloat(el.getAttribute("y1") || "0");
-             const x2 = parseFloat(el.getAttribute("x2") || "0");
-             const y2 = parseFloat(el.getAttribute("y2") || "0");
-             const p1local = applyLocal(x1, y1);
-             const p2local = applyLocal(x2, y2);
-             const p1 = transformPt(p1local.x, p1local.y);
-             const p2 = transformPt(p2local.x, p2local.y);
-             writer.addLine(p1.x, p1.y, p2.x, p2.y, getLayer(el), getColor(el));
-         } 
-         else if (tag === "rect") {
-             const x = parseFloat(el.getAttribute("x") || "0");
-             const y = parseFloat(el.getAttribute("y") || "0");
-             const w = parseFloat(el.getAttribute("width") || "0");
-             const h = parseFloat(el.getAttribute("height") || "0");
-             const pts = [
-                 {x, y}, {x: x+w, y}, {x: x+w, y: y+h}, {x, y: y+h}
-             ].map(p => applyLocal(p.x, p.y)).map(p => transformPt(p.x, p.y));
-             writer.addPolyline(pts, true, getLayer(el), getColor(el));
-         }
-         else if (tag === "circle") {
-             const cx = parseFloat(el.getAttribute("cx") || "0");
-             const cy = parseFloat(el.getAttribute("cy") || "0");
-             const r = parseFloat(el.getAttribute("r") || "0");
-             const c = transformPt(applyLocal(cx, cy).x, applyLocal(cx, cy).y);
-             writer.addCircle(c.x, c.y, r * scale, getLayer(el), getColor(el));
-         }
-         else if (tag === "path") {
+        if (tag === "line") {
+            const x1 = parseFloat(el.getAttribute("x1") || "0");
+            const y1 = parseFloat(el.getAttribute("y1") || "0");
+            const x2 = parseFloat(el.getAttribute("x2") || "0");
+            const y2 = parseFloat(el.getAttribute("y2") || "0");
+            const p1local = applyLocal(x1, y1);
+            const p2local = applyLocal(x2, y2);
+            const p1 = transformPt(p1local.x, p1local.y);
+            const p2 = transformPt(p2local.x, p2local.y);
+            writer.addLine(p1.x, p1.y, p2.x, p2.y, getLayer(el), getColor(el));
+        }
+        else if (tag === "rect") {
+            const x = parseFloat(el.getAttribute("x") || "0");
+            const y = parseFloat(el.getAttribute("y") || "0");
+            const w = parseFloat(el.getAttribute("width") || "0");
+            const h = parseFloat(el.getAttribute("height") || "0");
+            const pts = [
+                { x, y }, { x: x + w, y }, { x: x + w, y: y + h }, { x, y: y + h }
+            ].map(p => applyLocal(p.x, p.y)).map(p => transformPt(p.x, p.y));
+            writer.addPolyline(pts, true, getLayer(el), getColor(el));
+        }
+        else if (tag === "circle") {
+            const cx = parseFloat(el.getAttribute("cx") || "0");
+            const cy = parseFloat(el.getAttribute("cy") || "0");
+            const r = parseFloat(el.getAttribute("r") || "0");
+            const c = transformPt(applyLocal(cx, cy).x, applyLocal(cx, cy).y);
+            writer.addCircle(c.x, c.y, r * scale, getLayer(el), getColor(el));
+        }
+        else if (tag === "path") {
             const d = el.getAttribute("d") || "";
             const commands = d.match(/([A-Za-z])|([-0-9.]+)/g);
             if (commands) {
-                let pts: {x: number, y: number}[] = [];
-                let currLocal = {x:0, y:0};
-                
-                for(let i=0; i<commands.length; i++) {
+                let pts: { x: number, y: number }[] = [];
+                let currLocal = { x: 0, y: 0 };
+
+                for (let i = 0; i < commands.length; i++) {
                     const token = commands[i];
-                    if(/[A-Za-z]/.test(token)) {
+                    if (/[A-Za-z]/.test(token)) {
                         const cmd = token.toUpperCase();
                         if (cmd === "M" || cmd === "L") {
                             const x = parseFloat(commands[++i]);
@@ -466,11 +472,11 @@ const addSvgToDxf = (writer: DxfWriter, svgString: string, tx: number, ty: numbe
                             const y = parseFloat(commands[++i]);
                             const p0 = currLocal;
                             const steps = 6;
-                            for(let s=1; s<=steps; s++) {
-                                const t = s/steps;
-                                const invT = 1-t;
-                                const bx = (invT*invT * p0.x) + (2*invT*t * x1) + (t*t * x);
-                                const by = (invT*invT * p0.y) + (2*invT*t * y1) + (t*t * y);
+                            for (let s = 1; s <= steps; s++) {
+                                const t = s / steps;
+                                const invT = 1 - t;
+                                const bx = (invT * invT * p0.x) + (2 * invT * t * x1) + (t * t * x);
+                                const by = (invT * invT * p0.y) + (2 * invT * t * y1) + (t * t * y);
                                 const bt = applyLocal(bx, by);
                                 pts.push(transformPt(bt.x, bt.y));
                             }
@@ -480,32 +486,32 @@ const addSvgToDxf = (writer: DxfWriter, svgString: string, tx: number, ty: numbe
                 }
                 if (pts.length > 1) writer.addPolyline(pts, false, getLayer(el), getColor(el));
             }
-         }
-         else if (tag === "text") {
-             const x = parseFloat(el.getAttribute("x") || "0");
-             const y = parseFloat(el.getAttribute("y") || "0");
-             const text = el.textContent || "";
-             const p = transformPt(applyLocal(x, y).x, applyLocal(x, y).y);
-             
-             let fontSize = 24;
-             const fsAttr = el.getAttribute("font-size");
-             if(fsAttr) fontSize = parseFloat(fsAttr);
-             
-             const finalH = fontSize * scale;
-             let finalRot = -rot; 
-             
-             let align: 'left'|'center'|'right' = 'left';
-             const anchor = el.getAttribute("text-anchor");
-             if (anchor === "middle") align = 'center';
-             if (anchor === "end") align = 'right';
+        }
+        else if (tag === "text") {
+            const x = parseFloat(el.getAttribute("x") || "0");
+            const y = parseFloat(el.getAttribute("y") || "0");
+            const text = el.textContent || "";
+            const p = transformPt(applyLocal(x, y).x, applyLocal(x, y).y);
 
-             writer.addText(p.x, p.y, text, finalH, getLayer(el), getColor(el), align, finalRot);
-         }
-         else if (tag === "g") {
-             Array.from(el.children).forEach(c => processElement(c, {rotate: rot, cx, cy}));
-         }
+            let fontSize = 24;
+            const fsAttr = el.getAttribute("font-size");
+            if (fsAttr) fontSize = parseFloat(fsAttr);
+
+            const finalH = fontSize * scale;
+            let finalRot = -rot;
+
+            let align: 'left' | 'center' | 'right' = 'left';
+            const anchor = el.getAttribute("text-anchor");
+            if (anchor === "middle") align = 'center';
+            if (anchor === "end") align = 'right';
+
+            writer.addText(p.x, p.y, text, finalH, getLayer(el), getColor(el), align, finalRot);
+        }
+        else if (tag === "g") {
+            Array.from(el.children).forEach(c => processElement(c, { rotate: rot, cx, cy }));
+        }
     };
-    
+
     Array.from(svgEl.children).forEach(c => processElement(c));
 };
 
@@ -513,17 +519,16 @@ const addSvgToDxf = (writer: DxfWriter, svgString: string, tx: number, ty: numbe
  * Main Export Function
  * Arranges pages side-by-side in Model Space.
  */
-export const downloadSheetDxf = (items: OrderItem[], header: OrderHeader) => {
+export const generateSheetDxfString = (items: OrderItem[], header: OrderHeader): string => {
     const writer = new DxfWriter();
-    const filename = `${header.project.replace(/[^a-z0-9]/gi, '_') || 'Project'}_${header.osNo || 'Order'}_Layout`;
 
     // 1. Chunk Items
     const ITEMS_PER_PAGE = 6;
     const pages = [];
     if (items.length === 0) pages.push([]);
     else {
-        for(let i=0; i<items.length; i+=ITEMS_PER_PAGE) {
-            pages.push(items.slice(i, i+ITEMS_PER_PAGE));
+        for (let i = 0; i < items.length; i += ITEMS_PER_PAGE) {
+            pages.push(items.slice(i, i + ITEMS_PER_PAGE));
         }
     }
 
@@ -534,16 +539,27 @@ export const downloadSheetDxf = (items: OrderItem[], header: OrderHeader) => {
         const pageOffsetY = 0;
 
         // Draw Template (Header, Grid, etc)
-        drawPageTemplate(writer, pageOffsetX, pageOffsetY, header, i+1, pages.length);
+        drawPageTemplate(writer, pageOffsetX, pageOffsetY, header, i + 1, pages.length);
 
         // Draw Items in Grid
         pageItems.forEach((item, slotIdx) => {
-             drawItem(writer, pageOffsetX, pageOffsetY, item, slotIdx, i*ITEMS_PER_PAGE);
+            drawItem(writer, pageOffsetX, pageOffsetY, item, slotIdx, i * ITEMS_PER_PAGE);
         });
     });
 
-    // 3. Download
-    const blob = new Blob([writer.toDxfString()], { type: "application/dxf" });
+    // 3. Return String
+    return writer.toDxfString();
+};
+
+/**
+ * Main Export Function
+ * Arranges pages side-by-side in Model Space and triggers download.
+ */
+export const downloadSheetDxf = (items: OrderItem[], header: OrderHeader) => {
+    const dxfString = generateSheetDxfString(items, header);
+    const filename = `${header.project.replace(/[^a-z0-9]/gi, '_') || 'Project'}_${header.osNo || 'Order'}_Layout`;
+
+    const blob = new Blob([dxfString], { type: "application/dxf" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = filename + ".dxf";
