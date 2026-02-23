@@ -1,0 +1,339 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { OrderHeader } from '../types';
+
+interface SidebarProps {
+    header: OrderHeader;
+    onChange: (field: keyof OrderHeader, value: string) => void;
+    onBulkChange: (updates: Partial<OrderHeader>) => void;
+    onSaveProject: () => void;
+    onLoadProject: (file: File) => void;
+    onOpenAiWizard?: () => void;
+    isDarkMode?: boolean;
+    toggleDarkMode?: () => void;
+}
+
+interface SavedProfile {
+    id: string;
+    name: string;
+    data: Partial<OrderHeader>;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({
+    header, onChange, onBulkChange, onSaveProject, onLoadProject,
+    onOpenAiWizard, isDarkMode, toggleDarkMode
+}) => {
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Address Book State
+    const [showAddressBook, setShowAddressBook] = useState(false);
+    const [showHelpModal, setShowHelpModal] = useState(false);
+    const [savedProfiles, setSavedProfiles] = useState<SavedProfile[]>([]);
+    const [newProfileName, setNewProfileName] = useState("");
+
+    // Load profiles from localStorage on mount
+    useEffect(() => {
+        const saved = localStorage.getItem('acesian_address_book');
+        if (saved) {
+            try {
+                setSavedProfiles(JSON.parse(saved));
+            } catch (e) {
+                console.error("Failed to parse address book", e);
+            }
+        }
+    }, []);
+
+    const handleSaveProfile = () => {
+        if (!newProfileName.trim()) {
+            alert("Please enter a name for this profile");
+            return;
+        }
+        // Save relevant customer fields
+        const profile: SavedProfile = {
+            id: Date.now().toString(),
+            name: newProfileName,
+            data: {
+                company: header.company,
+                from: header.from,
+                project: header.project,
+                preparedBy: header.preparedBy,
+                personInCharge: header.personInCharge,
+                customerRef: header.customerRef,
+                deliveryAddress: header.deliveryAddress,
+                afType: header.afType,
+                pressureRating: header.pressureRating
+            }
+        };
+        const updated = [...savedProfiles, profile];
+        setSavedProfiles(updated);
+        localStorage.setItem('acesian_address_book', JSON.stringify(updated));
+        setNewProfileName("");
+    };
+
+    const handleLoadProfile = (profile: SavedProfile) => {
+        if (window.confirm(`Load profile "${profile.name}"? This will overwrite current header fields.`)) {
+            onBulkChange(profile.data);
+            setShowAddressBook(false);
+        }
+    };
+
+    const handleDeleteProfile = (id: string) => {
+        if (window.confirm("Are you sure you want to delete this profile?")) {
+            const updated = savedProfiles.filter(p => p.id !== id);
+            setSavedProfiles(updated);
+            localStorage.setItem('acesian_address_book', JSON.stringify(updated));
+        }
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            onLoadProject(e.target.files[0]);
+            e.target.value = ""; // Reset
+        }
+    };
+
+    return (
+        <aside className={`no-print bg-white dark:bg-cad-800 border-r border-cad-200 dark:border-cad-700 flex flex-col h-full shadow-lg z-10 transition-all duration-300 ease-in-out ${isCollapsed ? 'w-12' : 'w-full md:w-80'}`}>
+
+            {/* Toggle Button */}
+            <button
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="h-10 w-full flex items-center justify-center border-b border-cad-200 dark:border-cad-700 bg-cad-50 dark:bg-cad-900 text-cad-500 hover:bg-cad-100 dark:hover:bg-cad-800 hover:text-cad-800 dark:hover:text-cad-200 focus:outline-none"
+                title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            >
+                {isCollapsed ? (
+                    <span className="text-xl">»</span>
+                ) : (
+                    <div className="flex items-center gap-2 w-full px-4">
+                        <span className="text-xl">«</span>
+                        <span className="text-xs font-bold uppercase">Hide Menu</span>
+                    </div>
+                )}
+            </button>
+
+            <div className={`flex flex-col h-full overflow-y-auto ${isCollapsed ? 'hidden' : 'block'}`}>
+                <div className="p-6 border-b border-cad-200 dark:border-cad-700 bg-cad-50 dark:bg-cad-900 overflow-visible relative">
+                    <div className="flex items-center justify-between mb-4">
+                        <h1 className="text-xl font-bold text-cad-800 dark:text-cad-100 flex items-center gap-2">
+                            <span className="text-2xl">📝</span> Order Setup
+                        </h1>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setShowHelpModal(true)}
+                                className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2.5 py-1.5 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 font-bold border border-purple-200 dark:border-purple-800 flex items-center gap-1.5 shadow-sm hover:shadow-md transition-all active:scale-95"
+                                title="Open Help Guide"
+                            >
+                                <span>❓</span> Help
+                            </button>
+                            {toggleDarkMode && (
+                                <button
+                                    onClick={toggleDarkMode}
+                                    className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2.5 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 font-bold border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+                                    title="Toggle Night Mode"
+                                >
+                                    <span>{isDarkMode ? '🌙' : '☀️'}</span>
+                                </button>
+                            )}
+                            <button
+                                onClick={() => setShowAddressBook(true)}
+                                className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2.5 py-1.5 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 font-bold border border-blue-200 dark:border-blue-800 flex items-center gap-1.5 shadow-sm hover:shadow-md transition-all active:scale-95"
+                                title="Open Address Book"
+                            >
+                                <span>📒</span> Book
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Project File Actions */}
+                    <div className="flex gap-2 mb-2">
+                        <button
+                            onClick={onSaveProject}
+                            className="flex-1 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 hover:shadow-md py-2.5 rounded text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
+                        >
+                            <span>💾</span> Save
+                        </button>
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="flex-1 bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 hover:shadow-md py-2.5 rounded text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
+                        >
+                            <span>📂</span> Load
+                        </button>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            accept=".json"
+                            className="hidden"
+                        />
+                    </div>
+
+                    {/* AI Action */}
+                    <button
+                        onClick={onOpenAiWizard}
+                        className="w-full mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 py-2 rounded text-xs font-bold flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
+                    >
+                        <span className="text-lg">✨</span> Import Excel via AI
+                    </button>
+                </div>
+
+                <div className="p-6 space-y-4">
+
+                    <InputGroup label="Company" value={header.company} onChange={(v) => onChange('company', v)} />
+                    <InputGroup label="From" value={header.from} onChange={(v) => onChange('from', v)} />
+                    <InputGroup label="Project" value={header.project} onChange={(v) => onChange('project', v)} />
+                    <InputGroup label="Date" type="date" value={header.date} onChange={(v) => onChange('date', v)} />
+                    <InputGroup label="Lateral No" value={header.lateralNo} onChange={(v) => onChange('lateralNo', v)} />
+                    <InputGroup label="Required Date" type="date" value={header.requiredDate} onChange={(v) => onChange('requiredDate', v)} />
+
+                    <div className="border-t border-cad-200 dark:border-cad-700 my-4"></div>
+
+                    <InputGroup label="O.S. No." value={header.osNo} onChange={(v) => onChange('osNo', v)} />
+                    <InputGroup label="P.O. No." value={header.poNo} onChange={(v) => onChange('poNo', v)} />
+                    <InputGroup label="Prepared By" value={header.preparedBy} onChange={(v) => onChange('preparedBy', v)} />
+                    <InputGroup label="Person in Charge" value={header.personInCharge} onChange={(v) => onChange('personInCharge', v)} />
+                    <InputGroup label="Customer Ref" value={header.customerRef} onChange={(v) => onChange('customerRef', v)} />
+
+                    <div className="flex flex-col gap-2 mb-1">
+                        <label className="text-xs font-semibold text-cad-700 dark:text-cad-300">Delivery Address</label>
+                        <textarea
+                            value={header.deliveryAddress}
+                            onChange={(e) => onChange('deliveryAddress', e.target.value)}
+                            className="w-full p-2 bg-white dark:bg-cad-800 border border-cad-300 dark:border-cad-600 rounded text-cad-900 dark:text-cad-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm"
+                            rows={3}
+                        />
+                    </div>
+
+                    <div className="border-t border-cad-200 my-4"></div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                        <InputGroup label="AF Type" value={header.afType} onChange={(v) => onChange('afType', v)} />
+                        <InputGroup label="Pressure Rating" value={header.pressureRating} onChange={(v) => onChange('pressureRating', v)} />
+                    </div>
+                </div>
+            </div>
+
+            {/* Address Book Modal */}
+            {showAddressBook && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[85vh] animate-[fadeIn_0.2s_ease-out]">
+                        <div className="p-4 bg-cad-50 border-b border-cad-200 flex justify-between items-center">
+                            <h3 className="font-bold text-cad-800 flex items-center gap-2 text-lg">
+                                <span>📒</span> Address Book
+                            </h3>
+                            <button
+                                onClick={() => setShowAddressBook(false)}
+                                className="text-cad-400 hover:text-red-500 transition-colors font-bold p-1 rounded-full hover:bg-red-50"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+
+                        <div className="p-4 bg-blue-50 border-b border-blue-100">
+                            <label className="block text-xs font-bold text-blue-800 mb-2 uppercase tracking-wide">Save Current Header Info</label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    placeholder="Profile Name (e.g. Acme Corp - Jurong)"
+                                    value={newProfileName}
+                                    onChange={(e) => setNewProfileName(e.target.value)}
+                                    className="flex-1 p-2 border border-blue-200 rounded text-sm focus:outline-none focus:border-blue-500 shadow-sm"
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSaveProfile()}
+                                />
+                                <button
+                                    onClick={handleSaveProfile}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded text-sm font-bold shadow-sm transition-colors"
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+                            <label className="block text-xs font-bold text-cad-500 uppercase tracking-wide mb-1">Saved Profiles</label>
+                            {savedProfiles.length === 0 ? (
+                                <div className="text-center text-cad-400 text-sm py-8 border-2 border-dashed border-cad-200 rounded-lg">
+                                    No saved profiles yet.
+                                </div>
+                            ) : (
+                                savedProfiles.map(profile => (
+                                    <div key={profile.id} className="bg-white border border-cad-200 rounded-lg p-3 hover:shadow-md transition-shadow flex justify-between items-center group">
+                                        <div className="overflow-hidden mr-3">
+                                            <div className="font-bold text-sm text-cad-800 truncate" title={profile.name}>{profile.name}</div>
+                                            <div className="text-xs text-cad-500 truncate" title={profile.data.company}>{profile.data.company || 'No Company'}</div>
+                                        </div>
+                                        <div className="flex gap-2 shrink-0">
+                                            <button
+                                                onClick={() => handleLoadProfile(profile)}
+                                                className="text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded hover:bg-green-100 font-bold border border-green-200 transition-colors"
+                                            >
+                                                Load
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteProfile(profile.id)}
+                                                className="text-xs bg-red-50 text-red-700 px-3 py-1.5 rounded hover:bg-red-100 font-bold border border-red-200 transition-colors"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Help Modal */}
+            {showHelpModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-cad-800 rounded-lg shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh] animate-[fadeIn_0.2s_ease-out]">
+                        <div className="p-4 bg-purple-50 dark:bg-purple-900/30 border-b border-purple-200 dark:border-purple-800 flex justify-between items-center">
+                            <h3 className="font-bold text-purple-900 dark:text-purple-100 flex items-center gap-2 text-lg">
+                                <span>❓</span> Quick Start Guide
+                            </h3>
+                            <button
+                                onClick={() => setShowHelpModal(false)}
+                                className="text-purple-400 hover:text-red-500 transition-colors font-bold p-1 rounded-full hover:bg-red-50"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        <div className="overflow-y-auto p-6 space-y-6 text-sm text-cad-700 dark:text-cad-300">
+                            <div>
+                                <h4 className="font-bold text-cad-900 dark:text-cad-100 mb-2 border-b pb-1">1. Setup Your Order</h4>
+                                <p>Fill in the header information in the sidebar (Company, Project, Dates). You can save presets into your <strong>Address Book</strong> for future use.</p>
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-cad-900 dark:text-cad-100 mb-2 border-b pb-1">2. Add Components</h4>
+                                <p className="mb-2">There are two ways to build your drafting sheet:</p>
+                                <ul className="list-disc pl-5 space-y-1 bg-cad-50 dark:bg-cad-900 p-3 rounded">
+                                    <li><strong>Manual:</strong> Use the top Builder panel. Select a type, enter dimensions, and click <em>Add Item</em>.</li>
+                                    <li><strong>AI Import:</strong> Click ✨ <em>Import Excel via AI</em>. Upload your Bill of Materials (Excel) and let AI extract the components automatically.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-cad-900 dark:text-cad-100 mb-2 border-b pb-1">3. Export & Print</h4>
+                                <p>Once ready, use the buttons in the top right to download a <strong>DXF file</strong> for your fabrication machines, or print a PDF summary.</p>
+                            </div>
+                            <div className="pt-4 flex justify-end">
+                                <button onClick={() => setShowHelpModal(false)} className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded shadow-sm">Got it!</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </aside>
+    );
+};
+
+const InputGroup = ({ label, value, onChange, type = "text" }: { label: string, value: string, onChange: (v: string) => void, type?: string }) => (
+    <div className="flex flex-col gap-2 mb-1">
+        <label className="text-xs font-semibold text-cad-700 dark:text-cad-300">{label}</label>
+        <input
+            type={type}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full p-2 bg-white dark:bg-cad-800 border border-cad-300 dark:border-cad-600 rounded text-cad-900 dark:text-cad-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm font-medium"
+        />
+    </div>
+);
