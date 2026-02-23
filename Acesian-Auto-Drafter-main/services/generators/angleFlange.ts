@@ -9,9 +9,8 @@ export const generateAngleFlange = (params: DuctParams, activeField: string | nu
     const cy = VIEW_HEIGHT / 2;
 
     const realD1 = params.d1 || 800;
-    const d1 = Math.min(realD1, VIEW_HEIGHT - 50); // Clamp visual dimension
 
-    const std = getFlangeParams(d1);
+    const std = getFlangeParams(realD1);
     const realPCD = params.pcd !== undefined ? params.pcd : std.bcd;
     const numBolts = params.holeCount !== undefined ? params.holeCount : std.holeCount;
 
@@ -19,14 +18,25 @@ export const generateAngleFlange = (params: DuctParams, activeField: string | nu
     const isManual = (params.pcd !== undefined && params.pcd !== std.bcd) ||
         (params.holeCount !== undefined && params.holeCount !== std.holeCount);
 
-    // Scale logic
-    const theoreticalOD = realPCD + 40;
-    const targetSize = 320; // Reduce scale target to fit dimensions in 450px height
-    const scale = targetSize / theoreticalOD;
+    // Scale logic - Strictly proportional to real world dimensions
+    const realOD = params.pcd !== undefined ?
+        realPCD + (std.od - std.bcd) : std.od;
 
-    const V_R_ID = (d1 / 2) * scale;
-    const V_R_PCD = (realPCD / 2) * scale;
-    const V_R_OD = V_R_PCD + 15;
+    const targetDiam = 360; // Fit comfortably within 450px height
+    const scale = targetDiam / realOD;
+
+    let V_R_ID = (realD1 / 2) * scale;
+    let V_R_PCD = (realPCD / 2) * scale;
+    let V_R_OD = (realOD / 2) * scale;
+
+    // Fallback for gigantic ducts (e.g., D=3000) where the flange on screen would be < 10 pixels wide
+    const flangeVisualWidth = V_R_OD - V_R_ID;
+    if (flangeVisualWidth < 24) {
+        const add = 24 - flangeVisualWidth;
+        const pcdRatio = (realPCD - realD1) / (realOD - realD1); // Typically ~0.6
+        V_R_PCD += add * pcdRatio;
+        V_R_OD += add;
+    }
 
     // Flange Body (Concentric Circles)
     const odCircle = `<circle cx="${cx}" cy="${cy}" r="${V_R_OD}" class="line" fill="none" />`;

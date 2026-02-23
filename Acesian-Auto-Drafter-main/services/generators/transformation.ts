@@ -15,10 +15,15 @@ export const generateTransformation = (params: DuctParams, activeField: string |
     const realL = params.length || 300;
     const realH = params.offset || 0;
 
-    // SCHEMATIC CLAMPING
+    // SCHEMATIC CLAMPING (Proportional)
     const MAX_VISUAL_LENGTH = 400;
-    const V_D = Math.min(realD, V_CONSTANTS.MAX_DIAM);
-    const V_S = Math.min(realS, V_CONSTANTS.MAX_DIAM);
+
+    // Instead of independently clamping D and S, preserve their visual ratio.
+    const maxDS = Math.max(realD, realS);
+    const scale = Math.min(1, V_CONSTANTS.MAX_DIAM / maxDS);
+
+    const V_D = Math.max(20, realD * scale); // Ensure it doesn't vanish entirely
+    const V_S = Math.max(20, realS * scale);
     const V_L = Math.min(realL, MAX_VISUAL_LENGTH);
 
     // Visual Offset H
