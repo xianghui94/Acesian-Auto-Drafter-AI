@@ -15,3 +15,4 @@ export * from './generators/blastGate';
 export * from './generators/angleFlange';
 export * from './generators/offset';
 export * from './generators/saddle';
+export * from './generators/custom';

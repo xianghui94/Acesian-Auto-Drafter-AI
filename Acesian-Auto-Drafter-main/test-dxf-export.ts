@@ -1,5 +1,6 @@
 import { generateSheetDxfString } from './utils/dxfWriter';
 import { generateStraight } from './services/generators/straight';
+import { generateBootTee } from './services/generators/bootTee';
 
 // Zero-dependency Mock DOMParser for SVG -> DXF Node Testing
 class MockDOMParser {
@@ -73,13 +74,22 @@ async function runTest() {
     try {
         console.log("Generating Straight Duct SVG...");
         const straightSvg = generateStraight({ width: 500, height: 400, length: 1200 });
+        const bootSvg = generateBootTee({ d1: 500, d3: 300 });
 
-        const mockItem = {
-            id: '1', type: 'Straight', description: 'Straight Duct',
+        const mockItem1: any = {
+            id: '1', itemNo: 1, componentType: 'Straight', type: 'Straight', description: 'Straight Duct',
             material: 'SS304', thickness: '0.8', coating: 'None',
             qty: 1, tagNo: 'T1', notes: 'Test',
             params: { width: 500, height: 400, length: 1200 },
             sketchSvg: straightSvg
+        };
+
+        const mockItem2: any = {
+            id: '2', itemNo: 2, componentType: 'Boot Tee', type: 'Boot Tee', description: 'Boot Tee Ø500 / Ø300',
+            material: 'SS304', thickness: '0.8', coating: 'None',
+            qty: 1, tagNo: 'T2', notes: 'Test Arc',
+            params: { d1: 500, d3: 300 },
+            sketchSvg: bootSvg
         };
 
         const mockHeader = {
@@ -90,7 +100,7 @@ async function runTest() {
         };
 
         console.log("Exporting DXF String...");
-        const dxf = generateSheetDxfString([mockItem], mockHeader);
+        const dxf = generateSheetDxfString([mockItem1, mockItem2], mockHeader);
 
         console.log("\n====== DXF EXPORT DIAGNOSTICS ======");
         console.log("Document Size:", dxf.length, "chars");

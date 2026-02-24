@@ -16,7 +16,8 @@ export enum ComponentType {
   ANGLE_FLANGE = "Angle Flange (角铁法兰)",
   OFFSET = "Offset (S-Bend)",
   SADDLE = "Saddle Tap (马鞍接口)",
-  MANUAL = "Manual Input (Blank Item)"
+  MANUAL = "Manual Input (Blank Item)",
+  CUSTOM = "Custom (Non-Standard)"
 }
 
 export type DuctParams = {

@@ -303,7 +303,7 @@ const SinglePage = ({ header, items, pageIndex, totalPages, startIndex, onRemove
                     </div>
 
                     {/* Sketch Area */}
-                    <div className="flex-1 w-full flex items-center justify-center overflow-hidden p-1 min-h-0 relative">
+                    <div className={`flex-1 w-full flex items-center justify-center overflow-hidden min-h-0 relative ${item.componentType === 'Custom (Non-Standard)' && item.params.imageUrl ? 'p-0' : 'p-1'}`}>
                       {item.sketchSvg && (
                         <div
                           className="w-full h-full flex items-center justify-center"

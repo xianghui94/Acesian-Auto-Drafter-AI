@@ -73,10 +73,11 @@ export const ItemBuilder: React.FC<ItemBuilderProps> = ({ onSave, editingItem, i
 
     // --- Live Preview Effect ---
     useEffect(() => {
-        // Whenever params, type, OR activeField changes, regenerate the preview
-        const svg = generateDuctDrawing(componentType, params, activeField);
+        // Whenever params, type, activeField OR notes changes, regenerate the preview
+        const previewParams = { ...params, _notes: meta.notes };
+        const svg = generateDuctDrawing(componentType, previewParams, activeField);
         setPreviewSvg(svg);
-    }, [componentType, params, activeField]);
+    }, [componentType, params, activeField, meta.notes]);
 
     // Load Edit Data
     useEffect(() => {
@@ -290,17 +291,23 @@ export const ItemBuilder: React.FC<ItemBuilderProps> = ({ onSave, editingItem, i
     const handleSave = async () => {
         // UX Audit: Validation
         const newErrors = new Set<string>();
-        Object.entries(params).forEach(([k, v]) => {
-            const numV = Number(v);
-            // Strict required fields that cannot be 0 or negative
-            if (['d1', 'd2', 'length', 'radius', 'width', 'height', 'tap_d', 'branch_d', 'a_len', 'b_len'].includes(k) && (isNaN(numV) || numV <= 0)) {
-                newErrors.add(k);
-            }
-            // Catch-all for any straggling negative parameters (preventing bad SVGs)
-            if (!isNaN(numV) && numV < 0) {
-                newErrors.add(k);
-            }
-        });
+
+        if (componentType === ComponentType.CUSTOM) {
+            if (!params.itemName || !params.itemName.trim()) newErrors.add('itemName');
+        } else if (componentType !== ComponentType.MANUAL) {
+            Object.entries(params).forEach(([k, v]) => {
+                const numV = Number(v);
+                // Strict required fields that cannot be 0 or negative
+                if (['d1', 'd2', 'length', 'radius', 'width', 'height', 'tap_d', 'branch_d', 'a_len', 'b_len'].includes(k) && (isNaN(numV) || numV <= 0)) {
+                    newErrors.add(k);
+                }
+                // Catch-all for any straggling negative parameters (preventing bad SVGs)
+                if (!isNaN(numV) && numV < 0) {
+                    newErrors.add(k);
+                }
+            });
+        }
+
         if (meta.qty <= 0) newErrors.add('qty');
 
         if (newErrors.size > 0) {

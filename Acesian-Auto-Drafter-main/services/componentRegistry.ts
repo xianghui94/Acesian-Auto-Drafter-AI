@@ -125,9 +125,9 @@ export const COMPONENT_REGISTRY: Record<ComponentType, RegistryItem> = {
         defaultParams: { d1: 500, d2: 500, length: 800, offset: 200 },
         getDescription: (p) => {
             if (p.d1 !== p.d2) {
-                 return `Reducing Offset Ø${p.d1}-Ø${p.d2} / L=${p.length} / H=${p.offset}`;
+                return `Reducing Offset Ø${p.d1}-Ø${p.d2} / L=${p.length} / H=${p.offset}`;
             } else {
-                 return `Offset Ø${p.d1} / L=${p.length} / H=${p.offset}`;
+                return `Offset Ø${p.d1} / L=${p.length} / H=${p.offset}`;
             }
         }
     },
@@ -142,5 +142,11 @@ export const COMPONENT_REGISTRY: Record<ComponentType, RegistryItem> = {
         generator: (p) => "",
         defaultParams: { userDescription: "" },
         getDescription: (p) => p.userDescription || "Manual Item"
+    },
+    [ComponentType.CUSTOM]: {
+        inputs: Inputs.CustomInputs,
+        generator: Generators.generateCustom,
+        defaultParams: { itemName: "" },
+        getDescription: (p) => p.itemName || "Custom Non-Standard Item"
     }
 };

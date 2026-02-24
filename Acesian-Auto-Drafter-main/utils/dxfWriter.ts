@@ -159,41 +159,44 @@ const drawPageTemplate = (writer: DxfWriter, ox: number, oy: number, header: Ord
 
     // 3. Header Content (Logos & Company)
     // Left Placeholder (Acesian Logo)
-    writer.addRect(ox + CONTENT_L + 2, oy + Y_HEADER_START + 4, 25, 22, "LOGO", 3); // Green box
-    writer.addText(ox + CONTENT_L + 14.5, oy + Y_HEADER_START + 15, "LOGO", 4, "LOGO", 3, 'center');
+    writer.addRect(ox + CONTENT_L + 2, oy + Y_HEADER_START + 4, 30, 22, "LOGO", 3); // Green box
+    writer.addText(ox + CONTENT_L + 17, oy + Y_HEADER_START + 15, "LOGO", 5, "LOGO", 3, 'center');
 
     // Company Text (Center)
     const cx = ox + CONTENT_L + CONTENT_W / 2;
     const cyHead = oy + Y_HEADER_START;
-    writer.addText(cx, cyHead + 22, "Acesian Technologies Pte Ltd", 5, "TEXT", colorText, 'center');
-    writer.addText(cx, cyHead + 17, "Co Reg No. 200401285N", 2.5, "TEXT", colorText, 'center');
-    writer.addText(cx, cyHead + 13, "33 Mactaggart Road #04-00, Singapore(368082)", 2.5, "TEXT", colorText, 'center');
-    writer.addText(cx, cyHead + 9, "Tel: 67575310  Fax: 67575319", 2.5, "TEXT", colorText, 'center');
-    writer.addText(cx, cyHead + 5, "E-mail: sales@acesian.com", 2.5, "TEXT", colorText, 'center');
+    writer.addText(cx, cyHead + 20, "Acesian Technologies Pte Ltd", 6, "TEXT", colorText, 'center');
+    writer.addText(cx, cyHead + 15, "Co Reg No. 200401285N", 2.5, "TEXT", colorText, 'center');
+    writer.addText(cx, cyHead + 11, "33 Mactaggart Road #04-00, Singapore(368082)", 2.5, "TEXT", colorText, 'center');
+    writer.addText(cx, cyHead + 7, "Tel: 67575310  Fax: 67575319", 2.5, "TEXT", colorText, 'center');
+    writer.addText(cx, cyHead + 3, "E-mail: sales@acesian.com", 2.5, "TEXT", colorText, 'center');
 
     // Right Placeholders (Cert Logos)
     writer.addRect(ox + CONTENT_R - 55, oy + Y_HEADER_START + 4, 20, 16, "LOGO", 3);
     writer.addText(ox + CONTENT_R - 45, oy + Y_HEADER_START + 10, "CMT", 3, "LOGO", 3, 'center');
     writer.addRect(ox + CONTENT_R - 30, oy + Y_HEADER_START + 4, 25, 22, "LOGO", 3);
-    writer.addText(ox + CONTENT_R - 17.5, oy + Y_HEADER_START + 15, "UKAS", 3, "LOGO", 3, 'center');
+    writer.addText(ox + CONTENT_R - 17.5, oy + Y_HEADER_START + 15, "UKAS", 4, "LOGO", 3, 'center');
 
-    // Order Spec Title
-    writer.addText(cx, cyHead - 5, "ORDER SPECIFICATION (O.S)", 3.5, "TEXT", colorText, 'center');
-    writer.addText(ox + CONTENT_L + 5, cyHead - 5, "BY CUSTOMER", 2.5, "TEXT", colorText, 'left');
-    writer.addText(ox + CONTENT_R - 25, cyHead - 5, "BY ACESIAN", 2.5, "TEXT", colorText, 'left');
+    // Order Spec Title - Re-aligned tightly identical to PDF
+    writer.addText(cx, cyHead - 3.5, "ORDER SPECIFICATION ( O.S )", 4, "TEXT", colorText, 'center');
+    writer.addText(ox + CONTENT_L + 2, cyHead - 3.5, "BY CUSTOMER", 2.5, "TEXT", colorText, 'left');
+    writer.addText(ox + CONTENT_R - 2, cyHead - 3.5, "BY ACESIAN", 2.5, "TEXT", colorText, 'right');
 
     // 4. Info Table Grid (5 rows of 6mm + last row 12mm = 42mm total)
-    const rowY = [
-        oy + Y_INFO_START + 36, // Row 1 Top
-        oy + Y_INFO_START + 30,
-        oy + Y_INFO_START + 24,
-        oy + Y_INFO_START + 18,
-        oy + Y_INFO_START + 12,
-        oy + Y_INFO_START // Bottom
+    // We define the TOP coordinates of each row.
+    const rowYTop = [
+        oy + Y_HEADER_START,      // Row 0 Top (257)
+        oy + Y_HEADER_START - 6,  // Row 1 Top (251)
+        oy + Y_HEADER_START - 12, // Row 2 Top (245)
+        oy + Y_HEADER_START - 18, // Row 3 Top (239)
+        oy + Y_HEADER_START - 24, // Row 4 Top (233)
+        oy + Y_HEADER_START - 30, // Row 5 Top (Address, 227)
     ];
 
-    // Draw horizontal lines for Info Table
-    rowY.forEach(y => writer.addLine(ox + CONTENT_L, y, ox + CONTENT_R, y, "FRAME", colorFrame));
+    // Draw horizontal lines separating rows (skipping the top one as it's the header border)
+    for (let i = 1; i <= 5; i++) {
+        writer.addLine(ox + CONTENT_L, rowYTop[i], ox + CONTENT_R, rowYTop[i], "FRAME", colorFrame);
+    }
 
     // Draw Main Vertical dividers for Info Table based on Grid
     // Col 1 (25mm) | Col 2 (55mm) | Col 3 (25mm) | ...
@@ -201,40 +204,43 @@ const drawPageTemplate = (writer: DxfWriter, ox: number, oy: number, header: Ord
     const x2 = x1 + 55;  // 80mm from left
     const x3 = x2 + 25;  // 105mm from left
 
-    // Draw main verticals covering all rows
+    // Draw main verticals covering all rows (Down to the bottom of the table)
     writer.addLine(x1, oy + Y_HEADER_START, x1, oy + Y_INFO_START, "FRAME", colorFrame);
     writer.addLine(x2, oy + Y_HEADER_START, x2, oy + Y_INFO_START, "FRAME", colorFrame);
     writer.addLine(x3, oy + Y_HEADER_START, x3, oy + Y_INFO_START, "FRAME", colorFrame);
 
+    // Truncation helper
+    const trunc = (s: string | undefined | null, maxLen: number) => (!s) ? '' : (s.length > maxLen ? s.substring(0, maxLen - 1) + '..' : s);
+
     // Helper to fill text fields
     const addField = (row: number, label1: string, val1: string, label2: string, val2: string, label3?: string, val3?: string) => {
-        const y = rowY[row] - 4; // Vertical center approx
-        const h = 2.5;
+        const y = rowYTop[row] - 4; // text baseline 4mm below the top of the row
+        const h = 2.2;
         // Col 1 (L: 25mm)
         writer.addText(ox + CONTENT_L + 2, y, label1 + ":", h, "LABEL", colorText);
         // Col 2 (V: 55mm)
-        writer.addText(x1 + 2, y, val1, h, "TEXT", colorText);
+        writer.addText(x1 + 2, y, trunc(val1, 30), h, "TEXT", colorText);
         // Col 3 (L: 25mm)
         writer.addText(x2 + 2, y, label2 + ":", h, "LABEL", colorText);
 
-        if (label3 && val3) {
+        if (label3 && val3 !== undefined) {
             // 3-Column Layout: Col 4 (30mm), Col 5 (30mm), Col 6 (25mm)
             const x4 = x3 + 30; // 135mm from left
             const x5 = x4 + 30; // 165mm from left
 
-            // Draw row-specific vertical dividers
-            writer.addLine(x4, rowY[row + 1], x4, rowY[row], "FRAME", colorFrame);
-            writer.addLine(x5, rowY[row + 1], x5, rowY[row], "FRAME", colorFrame);
+            // Draw row-specific vertical dividers (stops at the bottom of the current row)
+            writer.addLine(x4, rowYTop[row], x4, rowYTop[row] - 6, "FRAME", colorFrame);
+            writer.addLine(x5, rowYTop[row], x5, rowYTop[row] - 6, "FRAME", colorFrame);
 
             // Col 4 (V: 30mm)
-            writer.addText(x3 + 2, y, val2, h, "TEXT", colorText);
+            writer.addText(x3 + 2, y, trunc(val2, 15), h, "TEXT", colorText);
             // Col 5 (L: 30mm)
             writer.addText(x4 + 2, y, label3 + ":", h, "LABEL", colorText);
             // Col 6 (V: 25mm)
-            writer.addText(x5 + 2, y, val3, h, "TEXT", colorText);
+            writer.addText(x5 + 2, y, trunc(val3, 12), h, "TEXT", colorText);
         } else {
             // 2-Column Layout: Col 4 extends to end (Remaining ~85mm)
-            writer.addText(x3 + 2, y, val2, h, "TEXT", colorText);
+            writer.addText(x3 + 2, y, trunc(val2, 40), h, "TEXT", colorText);
         }
     };
 
@@ -244,12 +250,14 @@ const drawPageTemplate = (writer: DxfWriter, ox: number, oy: number, header: Ord
     addField(3, "Date", header.date, "Person in Charge", header.personInCharge);
     addField(4, "Lateral No", header.lateralNo, "Customer Ref", header.customerRef);
 
-    // Last Row (Address - Taller)
-    const yAddr = rowY[5] + 8;
-    writer.addText(ox + CONTENT_L + 2, yAddr, "Req Date:", 2.5, "LABEL", colorText);
-    writer.addText(x1 + 2, yAddr, header.requiredDate, 2.5, "TEXT", colorText);
-    writer.addText(x2 + 2, yAddr, "Address:", 2.5, "LABEL", colorText);
-    writer.addText(x3 + 2, yAddr, header.deliveryAddress.substring(0, 60), 2.5, "TEXT", colorText);
+    // Last Row (Address - Taller height = 12mm)
+    // Draw text inside the 12mm container
+    const yAddr = rowYTop[5] - 4;
+    writer.addText(ox + CONTENT_L + 2, yAddr, "Req Date:", 2.2, "LABEL", colorText);
+    writer.addText(x1 + 2, yAddr, trunc(header.requiredDate, 30), 2.2, "TEXT", colorText);
+    writer.addText(x2 + 2, yAddr, "Address:", 2.2, "LABEL", colorText);
+    // Address may be long, truncate heavily. 
+    writer.addText(x3 + 2, yAddr, trunc(header.deliveryAddress, 55), 2.2, "TEXT", colorText);
 
     // 5. Item Grid Lines
     // Vertical Center Line
@@ -313,21 +321,23 @@ const drawItem = (writer: DxfWriter, ox: number, oy: number, item: OrderItem, sl
     writer.addLine(cx, yRow1, cx, yRow2, "FRAME", colorLine);
 
     // --- Fill Text ---
+    const trunc = (s: string, maxLen: number) => (!s) ? '' : (s.length > maxLen ? s.substring(0, maxLen - 1) + '..' : s);
+
     const ty1 = cellY - 3.5;
-    writer.addText(cellX + 1, ty1, `Desc: ${item.description}`, txtH);
-    writer.addText(cellX + wR1C1 + 1, ty1, `Mat: ${item.material}`, txtH);
+    writer.addText(cellX + 1, ty1, `Desc: ${trunc(item.description, 35)}`, txtH);
+    writer.addText(cellX + wR1C1 + 1, ty1, `Mat: ${trunc(item.material, 15)}`, txtH);
 
     const ty2 = yRow1 - 3.5;
     writer.addText(cellX + 1, ty2, `Item: ${startItemIdx + slotIdx + 1}`, txtH);
     writer.addText(cellX + wR2C1 + 1, ty2, `Thk: ${item.thickness}`, txtH);
     writer.addText(cellX + wR2C1 + wR2C2 + 1, ty2, `Qty: ${item.qty}`, txtH);
-    writer.addText(cellX + wR2C1 + wR2C2 + wR2C3 + 1, ty2, `Coating: ${item.coating}`, txtH);
+    writer.addText(cellX + wR2C1 + wR2C2 + wR2C3 + 1, ty2, `Coating: ${trunc(item.coating, 15)}`, txtH);
 
     const ty3 = yRow2 - 3.5;
-    writer.addText(cellX + 1, ty3, `Tag No: ${item.tagNo}`, txtH);
+    writer.addText(cellX + 1, ty3, `Tag No: ${trunc(item.tagNo, 50)}`, txtH);
 
     const tyNote = cellBot + 1.5;
-    writer.addText(cellX + 1, tyNote, `Note: ${item.notes}`, txtH);
+    writer.addText(cellX + 1, tyNote, `Note: ${trunc(item.notes, 50)}`, txtH);
 
     // --- SVG Drawing ---
     if (item.sketchSvg) {
@@ -445,47 +455,157 @@ export const addSvgToDxf = (writer: DxfWriter, svgString: string, tx: number, ty
         }
         else if (tag === "path") {
             const d = el.getAttribute("d") || "";
-            const commands = d.match(/([A-Za-z])|([-0-9.]+)/g);
-            if (commands) {
-                let pts: { x: number, y: number }[] = [];
-                let currLocal = { x: 0, y: 0 };
+            // Regex to split SVG path into commands and numbers
+            const regex = /([a-zA-Z])|([-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)/g;
+            let match;
+            const tokens: string[] = [];
+            while ((match = regex.exec(d)) !== null) {
+                if (match[0].trim()) tokens.push(match[0]);
+            }
 
-                for (let i = 0; i < commands.length; i++) {
-                    const token = commands[i];
-                    if (/[A-Za-z]/.test(token)) {
-                        const cmd = token.toUpperCase();
-                        if (cmd === "M" || cmd === "L") {
-                            const x = parseFloat(commands[++i]);
-                            const y = parseFloat(commands[++i]);
-                            currLocal = applyLocal(x, y);
-                            pts.push(transformPt(currLocal.x, currLocal.y));
-                            if (cmd === "M" && pts.length > 1) {
-                                pts = [transformPt(currLocal.x, currLocal.y)];
+            let pts: { x: number, y: number }[] = [];
+            let currLocal = { x: 0, y: 0 };
+            let startSubpath = { x: 0, y: 0 };
+            let currentCmd = '';
+
+            for (let i = 0; i < tokens.length; i++) {
+                const token = tokens[i];
+                if (/[a-zA-Z]/.test(token)) {
+                    currentCmd = token;
+                    if (currentCmd.toUpperCase() === 'Z') {
+                        if (pts.length > 1) writer.addPolyline(pts, true, getLayer(el), getColor(el));
+                        pts = [];
+                        currLocal = { ...startSubpath };
+                    }
+                } else {
+                    // It's a number, so we execute the currentCmd
+                    // We must step back one to process the number correctly in the block
+                    i--;
+
+                    const isRelative = currentCmd === currentCmd.toLowerCase();
+                    const cmd = currentCmd.toUpperCase();
+
+                    if (cmd === 'M' || cmd === 'L') {
+                        const x = parseFloat(tokens[++i]);
+                        const y = parseFloat(tokens[++i]);
+                        currLocal.x = isRelative ? currLocal.x + x : x;
+                        currLocal.y = isRelative ? currLocal.y + y : y;
+
+                        const pLocal = applyLocal(currLocal.x, currLocal.y);
+                        pts.push(transformPt(pLocal.x, pLocal.y));
+
+                        if (cmd === 'M') {
+                            startSubpath = { ...currLocal };
+                            if (pts.length > 1) { // If there were already points, start a new polyline
+                                writer.addPolyline(pts.slice(0, -1), false, getLayer(el), getColor(el));
+                                pts = [pts[pts.length - 1]];
                             }
-                        } else if (cmd === "Z") {
-                            if (pts.length > 1) writer.addPolyline(pts, true, getLayer(el), getColor(el));
-                            pts = [];
-                        } else if (cmd === "Q") {
-                            const x1 = parseFloat(commands[++i]);
-                            const y1 = parseFloat(commands[++i]);
-                            const x = parseFloat(commands[++i]);
-                            const y = parseFloat(commands[++i]);
-                            const p0 = currLocal;
-                            const steps = 6;
-                            for (let s = 1; s <= steps; s++) {
-                                const t = s / steps;
-                                const invT = 1 - t;
-                                const bx = (invT * invT * p0.x) + (2 * invT * t * x1) + (t * t * x);
-                                const by = (invT * invT * p0.y) + (2 * invT * t * y1) + (t * t * y);
-                                const bt = applyLocal(bx, by);
-                                pts.push(transformPt(bt.x, bt.y));
-                            }
-                            currLocal = applyLocal(x, y);
+                            // M followed by coordinates implicitly becomes L
+                            currentCmd = isRelative ? 'l' : 'L';
+                        }
+                    } else if (cmd === 'H') {
+                        const x = parseFloat(tokens[++i]);
+                        currLocal.x = isRelative ? currLocal.x + x : x;
+                        const pLocal = applyLocal(currLocal.x, currLocal.y);
+                        pts.push(transformPt(pLocal.x, pLocal.y));
+                    } else if (cmd === 'V') {
+                        const y = parseFloat(tokens[++i]);
+                        currLocal.y = isRelative ? currLocal.y + y : y;
+                        const pLocal = applyLocal(currLocal.x, currLocal.y);
+                        pts.push(transformPt(pLocal.x, pLocal.y));
+                    } else if (cmd === 'Q') {
+                        const x1 = parseFloat(tokens[++i]);
+                        const y1 = parseFloat(tokens[++i]);
+                        const x = parseFloat(tokens[++i]);
+                        const y = parseFloat(tokens[++i]);
+
+                        const cx1 = isRelative ? currLocal.x + x1 : x1;
+                        const cy1 = isRelative ? currLocal.y + y1 : y1;
+                        const ex = isRelative ? currLocal.x + x : x;
+                        const ey = isRelative ? currLocal.y + y : y;
+
+                        const p0 = { ...currLocal };
+                        const steps = 6;
+                        for (let s = 1; s <= steps; s++) {
+                            const t = s / steps;
+                            const invT = 1 - t;
+                            const bx = (invT * invT * p0.x) + (2 * invT * t * cx1) + (t * t * ex);
+                            const by = (invT * invT * p0.y) + (2 * invT * t * cy1) + (t * t * ey);
+                            const bt = applyLocal(bx, by);
+                            pts.push(transformPt(bt.x, bt.y));
+                        }
+                        currLocal = { x: ex, y: ey };
+                    } else if (cmd === 'C') {
+                        const x1 = parseFloat(tokens[++i]);
+                        const y1 = parseFloat(tokens[++i]);
+                        const x2 = parseFloat(tokens[++i]);
+                        const y2 = parseFloat(tokens[++i]);
+                        const x = parseFloat(tokens[++i]);
+                        const y = parseFloat(tokens[++i]);
+
+                        const cx1 = isRelative ? currLocal.x + x1 : x1;
+                        const cy1 = isRelative ? currLocal.y + y1 : y1;
+                        const cx2 = isRelative ? currLocal.x + x2 : x2;
+                        const cy2 = isRelative ? currLocal.y + y2 : y2;
+                        const ex = isRelative ? currLocal.x + x : x;
+                        const ey = isRelative ? currLocal.y + y : y;
+
+                        const p0 = { ...currLocal };
+                        const steps = 8;
+                        for (let s = 1; s <= steps; s++) {
+                            const t = s / steps;
+                            const invT = 1 - t;
+                            const bx = (invT * invT * invT * p0.x) + (3 * invT * invT * t * cx1) + (3 * invT * t * t * cx2) + (t * t * t * ex);
+                            const by = (invT * invT * invT * p0.y) + (3 * invT * invT * t * cy1) + (3 * invT * t * t * cy2) + (t * t * t * ey);
+                            const bt = applyLocal(bx, by);
+                            pts.push(transformPt(bt.x, bt.y));
+                        }
+                        currLocal = { x: ex, y: ey };
+                    } else if (cmd === 'A') {
+                        const rx = parseFloat(tokens[++i]);
+                        const ry = parseFloat(tokens[++i]);
+                        const rot = parseFloat(tokens[++i]);
+                        const largeArc = parseFloat(tokens[++i]);
+                        const sweep = parseFloat(tokens[++i]);
+                        const x = parseFloat(tokens[++i]);
+                        const y = parseFloat(tokens[++i]);
+
+                        const ex = isRelative ? currLocal.x + x : x;
+                        const ey = isRelative ? currLocal.y + y : y;
+
+                        // Arc Approximation (Bulging line segment to seal geometry gaps in CAD)
+                        const mx = (currLocal.x + ex) / 2;
+                        const my = (currLocal.y + ey) / 2;
+                        const dx = ex - currLocal.x;
+                        const dy = ey - currLocal.y;
+                        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+                        const nx = -dy / len;
+                        const ny = dx / len;
+                        const bulgeDir = sweep ? 1 : -1;
+                        const bulgeDist = Math.min(Math.max(rx, ry) * 0.15, 30); // Controlled bulge
+
+                        // Inject 2 intermediate points for a smoothish curve
+                        for (let step = 1; step <= 2; step++) {
+                            const t = step / 3;
+                            const ptx = currLocal.x + dx * t + (nx * bulgeDir * bulgeDist * Math.sin(t * Math.PI));
+                            const pty = currLocal.y + dy * t + (ny * bulgeDir * bulgeDist * Math.sin(t * Math.PI));
+                            const btLocal = applyLocal(ptx, pty);
+                            pts.push(transformPt(btLocal.x, btLocal.y));
+                        }
+
+                        // Final Point
+                        const pLocal = applyLocal(ex, ey);
+                        pts.push(transformPt(pLocal.x, pLocal.y));
+                        currLocal = { x: ex, y: ey };
+                    } else {
+                        // Unknown command, try to fast-forward past numbers
+                        while (i + 1 < tokens.length && !/[a-zA-Z]/.test(tokens[i + 1])) {
+                            i++;
                         }
                     }
                 }
-                if (pts.length > 1) writer.addPolyline(pts, false, getLayer(el), getColor(el));
             }
+            if (pts.length > 1) writer.addPolyline(pts, false, getLayer(el), getColor(el));
         }
         else if (tag === "text") {
             const x = parseFloat(el.getAttribute("x") || "0");
