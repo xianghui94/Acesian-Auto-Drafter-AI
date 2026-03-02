@@ -4,13 +4,13 @@ import { createSvg, drawDim, drawFlange, drawAnnotation, V_CONSTANTS } from "../
 import { calculateRadialBranchPath } from "../geometry/branchMath";
 
 export const generateTee = (params: DuctParams, activeField: string | null = null) => {
-  const VIEW_WIDTH = 1000; // Increased width for better separation
+  const VIEW_WIDTH = 1300; // Increased width for better separation
   const VIEW_HEIGHT = 600;
   const cy = 350;
 
-  // Separation: Left centered at 250, Right at 750
-  const cxLeft = 250;
-  const cxRight = 750;
+  // Separation: Left centered at 300, Right at 950
+  const cxLeft = 300;
+  const cxRight = 950;
 
   const Md = params.main_d || 500;
   const Bd = params.tap_d || 300;
@@ -96,9 +96,10 @@ export const generateTee = (params: DuctParams, activeField: string | null = nul
      <line x1="${cxRight}" y1="${cy - V_MD / 2 - 10}" x2="${cxRight}" y2="${cy + V_MD / 2 + 10}" class="center-line" />
   `;
 
+  const cxSideViewText = (geo.endPoint.x + cxRight + V_MD / 2) / 2;
   const titles = `
     <text x="${cxLeft}" y="${VIEW_HEIGHT - 30}" font-weight="bold" text-anchor="middle" font-size="18" text-decoration="underline">TOP VIEW</text>
-    <text x="${cxRight}" y="${VIEW_HEIGHT - 30}" font-weight="bold" text-anchor="middle" font-size="18" text-decoration="underline">SIDE VIEW</text>
+    <text x="${cxSideViewText}" y="${VIEW_HEIGHT - 30}" font-weight="bold" text-anchor="middle" font-size="18" text-decoration="underline">SIDE VIEW</text>
   `;
 
   return createSvg(

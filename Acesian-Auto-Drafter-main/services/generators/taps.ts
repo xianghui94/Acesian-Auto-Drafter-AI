@@ -17,7 +17,7 @@ interface FeaturePoint {
     angleDeg: number;
 }
 
-const VIEW_WIDTH = 800;
+const VIEW_WIDTH = 1300;
 const VIEW_HEIGHT = 650; // Increased from 450 to show dim stacks
 const CY = 325; // Shifted down
 const GEN_TEXT_SIZE = 24;
@@ -260,8 +260,8 @@ export const generateStraightWithTaps = (params: DuctParams, activeField: string
     const V_D = Math.min(realD1, V_CONSTANTS.MAX_DIAM);
     const V_L = Math.min(realL, MAX_VISUAL_LENGTH);
 
-    const cxLeft = 320;
-    const cxRight = 720;
+    const cxLeft = 400;
+    const cxRight = 1000;
 
     const xL = cxLeft - V_L / 2;
     const xR = cxLeft + V_L / 2;

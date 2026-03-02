@@ -4,9 +4,10 @@ import { getFlangeParams } from "../flangeStandards";
 
 export const generateAngleFlange = (params: DuctParams, activeField: string | null = null) => {
     const VIEW_WIDTH = VIEW_BOX_SIZE;
-    const VIEW_HEIGHT = 450; // Reduced to fit layout better
+    const VIEW_HEIGHT = 450;
     const cx = VIEW_WIDTH / 2;
-    const cy = VIEW_HEIGHT / 2;
+    // Shift the center downwards to explicitly make room for the Top Dimension text
+    const cy = VIEW_HEIGHT / 2 + 25;
 
     const realD1 = params.d1 || 800;
 
@@ -22,7 +23,11 @@ export const generateAngleFlange = (params: DuctParams, activeField: string | nu
     const realOD = params.pcd !== undefined ?
         realPCD + (std.od - std.bcd) : std.od;
 
-    const targetDiam = 360; // Fit comfortably within 450px height
+    // Buffer algorithm: We must leave visual room for the Dimension Line and its Text at the top.
+    // dimOffset is V_R_OD + 30. Text is typically 15px high. 
+    // Max V_R_OD = (targetDiam/2). So (targetDiam/2) + 45 must be < (VIEW_HEIGHT/2)
+    // targetDiam < VIEW_HEIGHT - 90
+    const targetDiam = VIEW_HEIGHT - 120; // Fit comfortably within 450px height while leaving top buffer
     const scale = targetDiam / realOD;
 
     let V_R_ID = (realD1 / 2) * scale;

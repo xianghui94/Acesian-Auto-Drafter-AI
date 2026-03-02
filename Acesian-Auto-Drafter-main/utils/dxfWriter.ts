@@ -178,9 +178,9 @@ const drawPageTemplate = (writer: DxfWriter, ox: number, oy: number, header: Ord
     writer.addText(ox + CONTENT_R - 17.5, oy + Y_HEADER_START + 15, "UKAS", 4, "LOGO", 3, 'center');
 
     // Order Spec Title - Re-aligned tightly identical to PDF
-    writer.addText(cx, cyHead - 3.5, "ORDER SPECIFICATION ( O.S )", 4, "TEXT", colorText, 'center');
-    writer.addText(ox + CONTENT_L + 2, cyHead - 3.5, "BY CUSTOMER", 2.5, "TEXT", colorText, 'left');
-    writer.addText(ox + CONTENT_R - 2, cyHead - 3.5, "BY ACESIAN", 2.5, "TEXT", colorText, 'right');
+    writer.addText(cx, cyHead + 2, "ORDER SPECIFICATION ( O.S )", 4, "TEXT", colorText, 'center');
+    writer.addText(ox + CONTENT_L + 2, cyHead + 2, "BY CUSTOMER", 2.5, "TEXT", colorText, 'left');
+    writer.addText(ox + CONTENT_R - 2, cyHead + 2, "BY ACESIAN", 2.5, "TEXT", colorText, 'right');
 
     // 4. Info Table Grid (5 rows of 6mm + last row 12mm = 42mm total)
     // We define the TOP coordinates of each row.

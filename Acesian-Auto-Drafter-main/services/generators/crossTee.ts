@@ -4,13 +4,13 @@ import { createSvg, drawDim, drawFlange, drawAnnotation, V_CONSTANTS } from "../
 import { calculateRadialBranchPath } from "../geometry/branchMath";
 
 export const generateCrossTee = (params: DuctParams, activeField: string | null = null) => {
-  const VIEW_WIDTH = 1000; // Increased width
+  const VIEW_WIDTH = 1300; // Increased width
   const VIEW_HEIGHT = 600;
   const cy = 300;
 
-  // Separation: Left centered at 250, Right at 750
-  const cxLeft = 250;
-  const cxRight = 750;
+  // Separation: Left centered at 300, Right at 950
+  const cxLeft = 300;
+  const cxRight = 950;
 
   const Md = params.main_d || 500;
   const Bd = params.tap_d || 300;

@@ -303,7 +303,7 @@ const SinglePage = ({ header, items, pageIndex, totalPages, startIndex, onRemove
                     </div>
 
                     {/* Sketch Area */}
-                    <div className={`flex-1 w-full flex items-center justify-center overflow-hidden min-h-0 relative ${item.componentType === 'Custom (Non-Standard)' && item.params.imageUrl ? 'p-0' : 'p-1'}`}>
+                    <div className={`flex-1 w-full flex items-center justify-center overflow-hidden min-h-0 relative ${item.componentType === 'Custom (Non-Standard)' && item.params.imageUrl ? 'p-0' : 'p-2 pt-4'}`}>
                       {item.sketchSvg && (
                         <div
                           className="w-full h-full flex items-center justify-center"
@@ -384,25 +384,25 @@ const HeaderRow = ({ label1, val1, label2, val2, label3, val3, className, val2Cl
   return (
     <div className={`flex border-b border-black last:border-0 items-center text-[9px] ${className || 'h-[6mm]'}`}>
       {/* Col 1 */}
-      <div className="w-[25mm] p-1 border-r border-black font-bold truncate bg-gray-50 h-full flex items-center">{label1}:</div>
+      <div className="w-[25mm] flex-none p-1 border-r border-black font-bold truncate bg-gray-50 h-full flex items-center">{label1}:</div>
       {/* Col 2 */}
-      <div className="w-[55mm] p-1 border-r border-black truncate h-full flex items-center">{val1}</div>
+      <div className="w-[55mm] flex-none p-1 border-r border-black truncate h-full flex items-center">{val1}</div>
 
       {/* Col 3 */}
-      <div className="w-[25mm] p-1 border-r border-black font-bold truncate bg-gray-50 h-full flex items-center">{label2}:</div>
+      <div className="w-[25mm] flex-none p-1 border-r border-black font-bold truncate bg-gray-50 h-full flex items-center">{label2}:</div>
 
       {label3 ? (
         <>
           {/* Col 4 (Short) */}
-          <div className="w-[30mm] p-1 border-r border-black truncate h-full flex items-center">{val2}</div>
+          <div className="w-[30mm] flex-none p-1 border-r border-black truncate h-full flex items-center">{val2}</div>
           {/* Col 5 */}
-          <div className="w-[30mm] p-1 border-r border-black font-bold truncate bg-gray-50 h-full flex items-center">{label3}:</div>
+          <div className="w-[30mm] flex-none p-1 border-r border-black font-bold truncate bg-gray-50 h-full flex items-center">{label3}:</div>
           {/* Col 6 */}
-          <div className="w-[25mm] p-1 truncate h-full flex items-center">{val3}</div>
+          <div className="w-[25mm] flex-none p-1 truncate h-full flex items-center">{val3}</div>
         </>
       ) : (
         /* Col 4 (Long) */
-        <div className={`flex-1 p-1 border-r border-black h-full flex items-center overflow-hidden ${val2Class || 'truncate'}`}>{val2}</div>
+        <div className={`flex-1 p-1 h-full flex items-center overflow-hidden ${val2Class || 'truncate'}`}>{val2}</div>
       )}
     </div>
   );

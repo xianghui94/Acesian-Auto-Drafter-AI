@@ -57,6 +57,15 @@ export const generateElbow = (params: DuctParams, activeField: string | null = n
   else if (angle >= 60) numSegments = 4;
   else if (angle >= 30) numSegments = 3;
 
+  // Diameter-specific segment overrides based on fabrication rules
+  if (D_real <= 150) {
+    if (angle === 90) numSegments = 4;
+    else if (angle === 60 || angle === 45) numSegments = 2;
+    else if (angle === 30) numSegments = 2;
+  } else if (D_real <= 950) {
+    if (angle === 30) numSegments = 2;
+  }
+
   const ptsOuter = [];
   const ptsInner = [];
   const ptsCenter = [];
