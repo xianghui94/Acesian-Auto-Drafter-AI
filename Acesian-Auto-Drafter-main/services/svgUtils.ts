@@ -45,9 +45,9 @@ export const createSvg = (content: string, width: number = VIEW_BOX_SIZE, height
     <style>
       .line { fill: none; stroke: black; stroke-width: ${CFG.strokeBody * scale}; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s; }
       .flange { fill: white; stroke: black; stroke-width: ${CFG.strokeFlange * scale}; transition: all 0.2s; }
-      .dim-line { stroke: red; stroke-width: ${CFG.strokeDim * scale}; transition: all 0.2s; pointer-events: all; }
-      .dim-arrow { fill: red; stroke: none; transition: all 0.2s; pointer-events: all; }
-      .dim-text { fill: red; font-family: sans-serif; font-size: ${CFG.textSize * scale}px; font-weight: bold; text-anchor: middle; paint-order: stroke fill; stroke: white; stroke-width: ${4 * scale}px; stroke-linejoin: round; transition: all 0.2s; cursor: pointer; pointer-events: all; }
+      .dim-line { stroke: black; stroke-width: ${CFG.strokeDim * scale}; transition: all 0.2s; pointer-events: all; }
+      .dim-arrow { stroke: black; stroke-width: ${CFG.strokeDim * 2 * scale}; stroke-linecap: round; transition: all 0.2s; pointer-events: all; }
+      .dim-text { fill: #ff00ff; font-family: sans-serif; font-size: ${CFG.textSize * scale}px; font-weight: normal; text-anchor: middle; paint-order: stroke fill; stroke: white; stroke-width: ${4 * scale}px; stroke-linejoin: round; transition: all 0.2s; cursor: pointer; pointer-events: all; }
       .center-line { stroke: #999; stroke-width: ${1 * scale}; stroke-dasharray: ${5 * scale},${3 * scale}; }
       .hidden-line { fill: none; stroke: black; stroke-width: ${1 * scale}; stroke-dasharray: ${3 * scale},${3 * scale}; }
       .phantom-line { fill: none; stroke: #999; stroke-width: ${0.5 * scale}; stroke-dasharray: ${10 * scale},${2 * scale},${2 * scale},${2 * scale}; }
@@ -71,14 +71,15 @@ export const createSvg = (content: string, width: number = VIEW_BOX_SIZE, height
 };
 
 export const drawArrow = (x: number, y: number, angleDeg: number, isHighlight: boolean = false) => {
+  // Repurposed to draw an architectural tick mark (/)
   const size = isHighlight ? CFG.arrowSize * 1.5 : CFG.arrowSize;
-  const rad = angleDeg * Math.PI / 180;
-  const x1 = x - size * Math.cos(rad - Math.PI / 6);
-  const y1 = y - size * Math.sin(rad - Math.PI / 6);
-  const x2 = x - size * Math.cos(rad + Math.PI / 6);
-  const y2 = y - size * Math.sin(rad + Math.PI / 6);
+  const tickLen = size * 0.7; // length of the tick
+  const x1 = x - tickLen;
+  const y1 = y + tickLen;
+  const x2 = x + tickLen;
+  const y2 = y - tickLen;
   const cls = isHighlight ? "dim-arrow highlight" : "dim-arrow";
-  return `<polygon points="${x},${y} ${x1},${y1} ${x2},${y2}" class="${cls}" />`;
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${cls}" />`;
 };
 
 // Updated drawDim to accept an ID and the currently active ID
