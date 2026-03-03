@@ -176,16 +176,38 @@ export const generateElbow = (params: DuctParams, activeField: string | null = n
   const midAngle = startRad + sweepRad / 2;
   const ix = cx + V_R_Inner * Math.cos(midAngle);
   const iy = cy + V_R_Inner * Math.sin(midAngle);
-  const labelDist = Math.max(V_R_Inner - 60, 20);
-  const lx = cx + labelDist * Math.cos(midAngle);
-  const ly = cy + labelDist * Math.sin(midAngle);
 
+  // Draw the radius line extending from the center (cx, cy) to the inner neck (ix, iy)
   const isRActive = activeField === 'radius';
-  const arrow = drawArrow(ix, iy, midAngle * 180 / Math.PI, isRActive);
-  const rLine = `<line x1="${lx}" y1="${ly}" x2="${ix}" y2="${iy}" class="${isRActive ? 'dim-line highlight' : 'dim-line'}" />`;
-  const rText = `<text x="${lx}" y="${ly}" class="${isRActive ? 'dim-text highlight' : 'dim-text'}" text-anchor="middle" dominant-baseline="middle" dy="20">R=${Number(valInnerR).toFixed(0)}</text>`;
+  const rLineCls = isRActive ? 'dim-line highlight' : 'dim-line';
+
+  // Ticks instead of arrows - one on origin, one on neck
+  const tick1 = drawArrow(cx, cy, 0, isRActive);
+  const tick2 = drawArrow(ix, iy, 0, isRActive);
+
+  // Line from center to neck
+  // Extend dimension line past center origin
+  const lineExt = -90; // 90 units past origin
+  const ex = cx + lineExt * Math.cos(midAngle);
+  const ey = cy + lineExt * Math.sin(midAngle);
+  const rLine = `<line x1="${ex}" y1="${ey}" x2="${ix}" y2="${iy}" class="${rLineCls}" />`;
+
+  const rotDeg = midAngle * 180 / Math.PI; // Rotate text to align with line
+
+  // Position text past the center origin
+  const textDist = -45;
+  const tdx = cx + textDist * Math.cos(midAngle);
+  const tdy = cy + textDist * Math.sin(midAngle);
+
+  const rTextCls = isRActive ? 'dim-text highlight' : 'dim-text';
+  const rText = `
+    <text x="${tdx}" y="${tdy}" class="${rTextCls}" transform="rotate(${rotDeg}, ${tdx}, ${tdy})" text-anchor="middle">
+      <tspan x="${tdx}" dy="-0.6em">Neck</tspan>
+      <tspan x="${tdx}" dy="1.2em">R=${Number(valInnerR).toFixed(0)}mm</tspan>
+    </text>
+  `;
 
   const body = `<path d="${dOuter}" class="line" /><path d="${dInner}" class="line" />`;
 
-  return createSvg(body + dCenter + seams + f1 + f2 + dimD + dimExt1 + dimExt2 + rLine + arrow + rText + remark1 + remark2, VIEW_WIDTH, VIEW_HEIGHT);
+  return createSvg(body + dCenter + seams + f1 + f2 + dimD + dimExt1 + dimExt2 + rLine + tick1 + tick2 + rText + remark1 + remark2, VIEW_WIDTH, VIEW_HEIGHT);
 };
