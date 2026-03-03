@@ -40,8 +40,8 @@ const drawPipeBody = (xL: number, yT: number, width: number, height: number, cxR
 
     let svg = "";
     svg += `<rect x="${xL}" y="${yT}" width="${width}" height="${height}" class="line" fill="var(--svg-fill)" />`;
-    svg += drawFlange(xL, CY, height, true);
-    svg += drawFlange(xR, CY, height, true);
+    svg += drawFlange(xL, CY, height, true, 'normal', 'left');
+    svg += drawFlange(xR, CY, height, true, 'normal', 'right');
     svg += `<line x1="${xL - 5}" y1="${CY}" x2="${xR + 5}" y2="${CY}" class="center-line" />`;
 
     svg += `<circle cx="${cxRight}" cy="${CY}" r="${height / 2}" class="line" fill="var(--svg-fill)" />`;
@@ -49,8 +49,8 @@ const drawPipeBody = (xL: number, yT: number, width: number, height: number, cxR
     svg += `<line x1="${cxRight}" y1="${CY - 10}" x2="${cxRight}" y2="${CY + 10}" stroke="var(--svg-stroke)" />`;
 
     svg += `
-        <text x="${xL + width / 2}" y="${VIEW_HEIGHT - 15}" font-weight="bold" text-anchor="middle" font-size="18" text-decoration="underline">TOP VIEW</text>
-        <text x="${cxRight}" y="${VIEW_HEIGHT - 15}" font-weight="bold" text-anchor="middle" font-size="18" text-decoration="underline">SIDE VIEW</text>
+        <text x="${xL + width / 2}" y="${VIEW_HEIGHT - 15}" class="title-text">TOP VIEW</text>
+        <text x="${cxRight}" y="${VIEW_HEIGHT - 15}" class="title-text">SIDE VIEW</text>
     `;
 
     svg += drawDim(xL - 15, yT, xL - 15, yB, `Ø${d1}`, 'left', null, 'd1', activeField);
@@ -64,7 +64,8 @@ const drawFeatureTopView = (
     yB: number,
     f: FeaturePoint,
     pipeDiam: number,
-    activeField: string | null
+    activeField: string | null,
+    svgScale: number = 1
 ): { svg: string, topExclusion: number, botExclusion: number } => {
     let svg = "";
     const r = f.diameter / 2;
@@ -101,7 +102,7 @@ const drawFeatureTopView = (
                 topExclusion = (yT - highestPoint) + 10;
             }
         } else {
-            svg += `<text x="${tx}" y="${CY - r - 25}" class="${effectiveLabelStyle}" font-size="${fontSize}">${f.label}</text>`;
+            svg += `<text x="${tx}" y="${CY - r - 25}" class="${effectiveLabelStyle}">${f.label}</text>`;
         }
     }
     else if (f.orientation === 'BOT') {
@@ -116,18 +117,22 @@ const drawFeatureTopView = (
         if (f.type === 'tap') {
             const fw = f.diameter + 8;
             const fh = 5;
-            svg += `<rect x="${tx - fw / 2}" y="${yTip}" width="${fw}" height="${fh}" class="flange ${activeClass}" fill="var(--svg-fill)" />`;
+            const p1 = `${tx - fw / 2},${yTip}`;
+            const p2 = `${tx + fw / 2},${yTip}`;
+            const p3 = `${tx + f.diameter / 2},${yTip + fh}`;
+            const p4 = `${tx - f.diameter / 2},${yTip + fh}`;
+            svg += `<path d="M${p1} L${p2} L${p3} L${p4} Z" class="flange ${activeClass}" fill="var(--svg-fill)" />`;
         } else {
             const cw = f.diameter + 4;
             svg += `<rect x="${tx - cw / 2}" y="${yTip}" width="${cw}" height="${8}" class="line ${activeClass}" fill="var(--svg-fill)" />`;
         }
 
         if (f.hasRemark) {
-            const res = drawAnnotation(tx, yTip, f.label, true, true, 40, false, fontSize);
+            const res = drawAnnotation(tx, yTip, f.label, true, true, 40, false, fontSize * svgScale);
             svg += res.svg;
             topExclusion = f.stickOut + res.height;
         } else {
-            svg += `<text x="${tx}" y="${yTip - 25}" class="${effectiveLabelStyle}" font-size="${fontSize}">${f.label}</text>`;
+            svg += `<text x="${tx}" y="${yTip - 25}" class="${effectiveLabelStyle}">${f.label}</text>`;
             topExclusion = f.stickOut + 40;
         }
     }
@@ -140,18 +145,20 @@ const drawFeatureTopView = (
         if (f.type === 'tap') {
             const fw = f.diameter + 8;
             const fh = 5;
-            svg += `<rect x="${tx - fw / 2}" y="${yTip - fh}" width="${fw}" height="${fh}" class="flange ${activeClass}" fill="var(--svg-fill)" />`;
+            const p1X = tx - fw / 2; const p2X = tx + fw / 2; const p3X = tx + f.diameter / 2; const p4X = tx - f.diameter / 2;
+            const yW = yTip; const yN = yTip - fh;
+            svg += `<path d="M${p1X},${yW} L${p2X},${yW} L${p3X},${yN} L${p4X},${yN} Z" class="flange ${activeClass}" fill="var(--svg-fill)" />`;
         } else {
             const cw = f.diameter + 4;
             svg += `<rect x="${tx - cw / 2}" y="${yTip - 8}" width="${cw}" height="${8}" class="line ${activeClass}" fill="var(--svg-fill)" />`;
         }
 
         if (f.hasRemark) {
-            const res = drawAnnotation(tx, yTip, f.label, false, true, 40, false, fontSize);
+            const res = drawAnnotation(tx, yTip, f.label, false, true, 40, false, fontSize * svgScale);
             svg += res.svg;
             botExclusion = f.stickOut + res.height;
         } else {
-            svg += `<text x="${tx}" y="${yTip + 25}" class="${effectiveLabelStyle}" font-size="${fontSize}">${f.label}</text>`;
+            svg += `<text x="${tx}" y="${yTip + 25}" class="${effectiveLabelStyle}">${f.label}</text>`;
             botExclusion = f.stickOut + 40;
         }
     }
@@ -179,7 +186,7 @@ const drawFeatureSideView = (cx: number, cy: number, f: FeaturePoint, pipeRad: n
     if (geo.flangePath) {
         svg += `<path d="${geo.flangePath}" class="flange ${activeClass}" fill="var(--svg-fill)" stroke-width="2" />`;
     }
-    svg += `<text x="${geo.labelPoint.x}" y="${geo.labelPoint.y}" class="${activeTextClass}" font-size="${GEN_TEXT_SIZE}" dominant-baseline="middle" text-anchor="middle">${f.angleDeg}°</text>`;
+    svg += `<text x="${geo.labelPoint.x}" y="${geo.labelPoint.y}" class="${activeTextClass}" dominant-baseline="middle" text-anchor="middle">${f.angleDeg}°</text>`;
     svg += `<line x1="${cx}" y1="${cy}" x2="${geo.endPoint.x}" y2="${geo.endPoint.y}" stroke="#999" stroke-dasharray="2,2" stroke-width="0.5" />`;
 
     return svg;
@@ -312,7 +319,7 @@ export const generateStraightWithTaps = (params: DuctParams, activeField: string
         const ratio = Math.max(0, Math.min(1, f.dist / realL));
         const tx = xL + (ratio * V_L);
 
-        const res = drawFeatureTopView(tx, yT, yB, f, V_D, activeField);
+        const res = drawFeatureTopView(tx, yT, yB, f, V_D, activeField, VIEW_WIDTH / 1000);
         svgContent += res.svg;
 
         if (res.topExclusion > maxStickTop) maxStickTop = res.topExclusion;
@@ -356,8 +363,8 @@ export const generateStraightWithTaps = (params: DuctParams, activeField: string
         <line x1="${cutX}" y1="${cutY1}" x2="${cutX}" y2="${cutY2}" class="phantom-line" stroke-width="2" />
         <polyline points="${cutX - 8},${cutY1} ${cutX},${cutY1} ${cutX},${cutY1 + 8}" fill="none" stroke="var(--svg-stroke)" stroke-width="3" />
         <polyline points="${cutX - 8},${cutY2} ${cutX},${cutY2} ${cutX},${cutY2 - 8}" fill="none" stroke="var(--svg-stroke)" stroke-width="3" />
-        <text x="${cutX}" y="${cutY1 - 8}" font-weight="bold" text-anchor="middle" font-size="${GEN_TEXT_SIZE}">A</text>
-        <text x="${cutX}" y="${cutY2 + 20}" font-weight="bold" text-anchor="middle" font-size="${GEN_TEXT_SIZE}">A</text>
+        <text x="${cutX}" y="${cutY1 - 8}" class="large-title-text">A</text>
+        <text x="${cutX}" y="${cutY2 + 20}" class="large-title-text">A</text>
     `;
 
     return createSvg(svgContent, VIEW_WIDTH, VIEW_HEIGHT);

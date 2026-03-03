@@ -37,25 +37,32 @@ export const CFG = {
 export const createSvg = (content: string, width: number = VIEW_BOX_SIZE, height: number = VIEW_BOX_SIZE) => {
   const viewBox = `0 0 ${width} ${height}`;
 
+  // Calculate relative scale so wider views (1300) get larger text natively, 
+  // preventing text shrink when the viewBox is squished into the grid.
+  const scale = width / VIEW_BOX_SIZE;
+
   return `<svg viewBox="${viewBox}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
     <style>
-      .line { fill: none; stroke: black; stroke-width: ${CFG.strokeBody}; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s; }
-      .flange { fill: white; stroke: black; stroke-width: ${CFG.strokeFlange}; transition: all 0.2s; }
-      .dim-line { stroke: red; stroke-width: ${CFG.strokeDim}; transition: all 0.2s; pointer-events: all; }
+      .line { fill: none; stroke: black; stroke-width: ${CFG.strokeBody * scale}; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s; }
+      .flange { fill: white; stroke: black; stroke-width: ${CFG.strokeFlange * scale}; transition: all 0.2s; }
+      .dim-line { stroke: red; stroke-width: ${CFG.strokeDim * scale}; transition: all 0.2s; pointer-events: all; }
       .dim-arrow { fill: red; stroke: none; transition: all 0.2s; pointer-events: all; }
-      .dim-text { fill: red; font-family: sans-serif; font-size: ${CFG.textSize}px; font-weight: bold; text-anchor: middle; paint-order: stroke fill; stroke: white; stroke-width: 4px; stroke-linejoin: round; transition: all 0.2s; cursor: pointer; pointer-events: all; }
-      .center-line { stroke: #999; stroke-width: 1; stroke-dasharray: 5,3; }
-      .hidden-line { fill: none; stroke: black; stroke-width: 1; stroke-dasharray: 3,3; }
-      .phantom-line { fill: none; stroke: #999; stroke-width: 0.5; stroke-dasharray: 10,2,2,2; }
-      .npt-text { fill: #9333ea; font-family: sans-serif; font-size: ${CFG.textSize}px; font-weight: bold; text-anchor: middle; paint-order: stroke fill; stroke: white; stroke-width: 3px; }
+      .dim-text { fill: red; font-family: sans-serif; font-size: ${CFG.textSize * scale}px; font-weight: bold; text-anchor: middle; paint-order: stroke fill; stroke: white; stroke-width: ${4 * scale}px; stroke-linejoin: round; transition: all 0.2s; cursor: pointer; pointer-events: all; }
+      .center-line { stroke: #999; stroke-width: ${1 * scale}; stroke-dasharray: ${5 * scale},${3 * scale}; }
+      .hidden-line { fill: none; stroke: black; stroke-width: ${1 * scale}; stroke-dasharray: ${3 * scale},${3 * scale}; }
+      .phantom-line { fill: none; stroke: #999; stroke-width: ${0.5 * scale}; stroke-dasharray: ${10 * scale},${2 * scale},${2 * scale},${2 * scale}; }
+      .npt-text { fill: #9333ea; font-family: sans-serif; font-size: ${CFG.textSize * scale}px; font-weight: bold; text-anchor: middle; paint-order: stroke fill; stroke: white; stroke-width: ${3 * scale}px; }
+
+      .title-text { fill: black; font-family: sans-serif; font-size: ${24 * scale}px; font-weight: bold; text-anchor: middle; text-decoration: underline; }
+      .large-title-text { fill: black; font-family: sans-serif; font-size: ${28 * scale}px; font-weight: bold; text-anchor: middle; }
 
       /* Highlighting Styles */
-      .highlight { stroke: #2563eb !important; stroke-width: 4px !important; }
-      .highlight.dim-text { fill: #2563eb !important; font-size: ${CFG.textSize * 1.3}px !important; }
+      .highlight { stroke: #2563eb !important; stroke-width: ${4 * scale}px !important; }
+      .highlight.dim-text { fill: #2563eb !important; font-size: ${CFG.textSize * 1.3 * scale}px !important; }
       .highlight.dim-arrow { fill: #2563eb !important; }
       
       /* Hover Effect for Dimensions */
-      g[data-param]:hover .dim-line { stroke: #2563eb; stroke-width: 3px; }
+      g[data-param]:hover .dim-line { stroke: #2563eb; stroke-width: ${3 * scale}px; }
       g[data-param]:hover .dim-text { fill: #2563eb; }
       g[data-param]:hover .dim-arrow { fill: #2563eb; }
     </style>
@@ -140,9 +147,29 @@ export const drawDim = (
   `;
 };
 
-export const drawFlange = (x: number, y: number, length: number, isVertical: boolean, type: 'normal' | 'small' = 'normal') => {
-  const ext = type === 'small' ? 4 : 10; // Flange extension
-  const thk = type === 'small' ? 3 : 6; // Flange thickness
+export const drawFlange = (
+  x: number,
+  y: number,
+  length: number,
+  isVertical: boolean,
+  type: 'normal' | 'small' = 'normal',
+  dir: 'left' | 'right' | 'up' | 'down' | 'none' = 'none'
+) => {
+  const ext = type === 'small' ? 4 : 8; // Flange extension
+  const thk = type === 'small' ? 3 : 4; // Flange thickness
+  const leg = type === 'small' ? 6 : 10; // Flange inner leg length
+
+  if (dir !== 'none') {
+    if (dir === 'left') {
+      return `<path d="M ${x},${y - length / 2 - ext} L ${x + thk},${y - length / 2 - ext} L ${x + thk},${y - length / 2} L ${x + leg},${y - length / 2} L ${x + leg},${y + length / 2} L ${x + thk},${y + length / 2} L ${x + thk},${y + length / 2 + ext} L ${x},${y + length / 2 + ext} Z" class="flange" />`;
+    } else if (dir === 'right') {
+      return `<path d="M ${x},${y - length / 2 - ext} L ${x - thk},${y - length / 2 - ext} L ${x - thk},${y - length / 2} L ${x - leg},${y - length / 2} L ${x - leg},${y + length / 2} L ${x - thk},${y + length / 2} L ${x - thk},${y + length / 2 + ext} L ${x},${y + length / 2 + ext} Z" class="flange" />`;
+    } else if (dir === 'up') {
+      return `<path d="M ${x - length / 2 - ext},${y} L ${x - length / 2 - ext},${y + thk} L ${x - length / 2},${y + thk} L ${x - length / 2},${y + leg} L ${x + length / 2},${y + leg} L ${x + length / 2},${y + thk} L ${x + length / 2 + ext},${y + thk} L ${x + length / 2 + ext},${y} Z" class="flange" />`;
+    } else if (dir === 'down') {
+      return `<path d="M ${x - length / 2 - ext},${y} L ${x - length / 2 - ext},${y - thk} L ${x - length / 2},${y - thk} L ${x - length / 2},${y - leg} L ${x + length / 2},${y - leg} L ${x + length / 2},${y - thk} L ${x + length / 2 + ext},${y - thk} L ${x + length / 2 + ext},${y} Z" class="flange" />`;
+    }
+  }
 
   if (isVertical) {
     // Pipe runs horizontal, flange is vertical line
@@ -153,14 +180,13 @@ export const drawFlange = (x: number, y: number, length: number, isVertical: boo
   }
 };
 
-export const drawRotatedFlange = (cx: number, cy: number, length: number, angleDeg: number) => {
-  // AngleDeg: Direction of pipe. Flange is perpendicular.
-  const ext = 10;
-  const thk = 6;
-  const h = length + ext * 2;
-  const rot = angleDeg + 90;
-
-  return `<rect x="${cx - h / 2}" y="${cy - thk / 2}" width="${h}" height="${thk}" class="flange" transform="rotate(${rot}, ${cx}, ${cy})" />`;
+export const drawRotatedFlange = (cx: number, cy: number, length: number, angleDeg: number, type: 'normal' | 'small' = 'normal') => {
+  const ext = type === 'small' ? 4 : 8;
+  const thk = type === 'small' ? 3 : 4;
+  const leg = type === 'small' ? 6 : 10;
+  // A 'right' facing flange (flat face on right, extending left into duct)
+  const d = `M ${cx},${cy - length / 2 - ext} L ${cx - thk},${cy - length / 2 - ext} L ${cx - thk},${cy - length / 2} L ${cx - leg},${cy - length / 2} L ${cx - leg},${cy + length / 2} L ${cx - thk},${cy + length / 2} L ${cx - thk},${cy + length / 2 + ext} L ${cx},${cy + length / 2 + ext} Z`;
+  return `<path d="${d}" class="flange" transform="rotate(${angleDeg}, ${cx}, ${cy})" />`;
 };
 
 // --- Helper: Draw Annotation Leader ---

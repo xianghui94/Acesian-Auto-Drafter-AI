@@ -126,8 +126,8 @@ export const generateReducer = (params: DuctParams, activeField: string | null =
     const cy1 = (y1Top + y1Bot) / 2;
     const cy2 = (y2Top + y2Bot) / 2;
 
-    const f1 = drawFlange(xLeft, cy1, vD1_Draw, true);
-    const f2 = drawFlange(xRight, cy2, vD2_Draw, true);
+    const f1 = drawFlange(xLeft, cy1, vD1_Draw, true, 'normal', 'left');
+    const f2 = drawFlange(xRight, cy2, vD2_Draw, true, 'normal', 'right');
 
     let remark1 = "";
     if (params.flangeRemark1) {

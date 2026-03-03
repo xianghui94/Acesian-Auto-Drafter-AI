@@ -54,10 +54,10 @@ export const generateCrossTee = (params: DuctParams, activeField: string | null 
     Z
   `;
 
-  const f1 = drawFlange(xL_Left, cy, V_MD, true);
-  const f2 = drawFlange(xR_Left, cy, V_MD, true);
-  const f3 = drawFlange(cxLeft, yBranchTop, V_BD, false);
-  const f4 = drawFlange(cxLeft, yBranchBot, V_BD, false);
+  const f1 = drawFlange(xL_Left, cy, V_MD, true, 'normal', 'left');
+  const f2 = drawFlange(xR_Left, cy, V_MD, true, 'normal', 'right');
+  const f3 = drawFlange(cxLeft, yBranchTop, V_BD, false, 'normal', 'up');
+  const f4 = drawFlange(cxLeft, yBranchBot, V_BD, false, 'normal', 'down');
 
   let remark1 = "";
   if (params.flangeRemark1) {
@@ -102,8 +102,8 @@ export const generateCrossTee = (params: DuctParams, activeField: string | null 
   const branchLeft = `<path d="${geoLeft.path}" class="line" fill="var(--svg-fill)" />`;
   const branchRight = `<path d="${geoRight.path}" class="line" fill="var(--svg-fill)" />`;
 
-  const f5 = drawFlange(geoLeft.endPoint.x, geoLeft.endPoint.y, V_BD, true);
-  const f6 = drawFlange(geoRight.endPoint.x, geoRight.endPoint.y, V_BD, true);
+  const f5 = drawFlange(geoLeft.endPoint.x, geoLeft.endPoint.y, V_BD, true, 'normal', 'left');
+  const f6 = drawFlange(geoRight.endPoint.x, geoRight.endPoint.y, V_BD, true, 'normal', 'right');
 
   const dimBd = drawDim(geoLeft.endPoint.x, geoLeft.endPoint.y - V_BD / 2, geoLeft.endPoint.x, geoLeft.endPoint.y + V_BD / 2, `Ø${Bd}`, 'left', null, 'tap_d', activeField);
 
@@ -116,8 +116,8 @@ export const generateCrossTee = (params: DuctParams, activeField: string | null 
   `;
 
   const titles = `
-    <text x="${cxLeft}" y="${VIEW_HEIGHT - 30}" font-weight="bold" text-anchor="middle" font-size="18" text-decoration="underline">TOP VIEW</text>
-    <text x="${cxRight}" y="${VIEW_HEIGHT - 30}" font-weight="bold" text-anchor="middle" font-size="18" text-decoration="underline">SIDE VIEW</text>
+    <text x="${cxLeft}" y="${VIEW_HEIGHT - 30}" class="title-text">TOP VIEW</text>
+    <text x="${cxRight}" y="${VIEW_HEIGHT - 30}" class="title-text">SIDE VIEW</text>
   `;
 
   return createSvg(

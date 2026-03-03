@@ -22,15 +22,15 @@ interface Point {
  * @returns SVG Path Data string
  */
 export const calculateRadialBranchPath = (
-    cx: number, 
-    cy: number, 
-    mainR: number, 
-    branchR: number, 
-    angleDeg: number, 
+    cx: number,
+    cy: number,
+    mainR: number,
+    branchR: number,
+    angleDeg: number,
     stickOut: number,
     isTap: boolean = false
 ): { path: string, flangePath: string, labelPoint: Point, endPoint: Point } => {
-    
+
     // 1. Convert geometric angle (0=Top) to Math angle (0=Right, -90=Top)
     // Input 0 -> -90 (Math)
     // Input 90 -> 0 (Math)
@@ -46,14 +46,14 @@ export const calculateRadialBranchPath = (
     // However, for a radial projection, we need the intersection points of the branch walls with the circle.
     // Intersection circle: x^2 + y^2 = mainR^2
     // Branch walls are parallel lines at distance +/- branchR from the branch centerline.
-    
+
     // Vector components for the Branch Centerline
     const cos = Math.cos(mathRad);
     const sin = Math.sin(mathRad);
-    
+
     // Perpendicular Vector (90 deg to centerline)
-    const pCos = Math.cos(mathRad + Math.PI/2);
-    const pSin = Math.sin(mathRad + Math.PI/2);
+    const pCos = Math.cos(mathRad + Math.PI / 2);
+    const pSin = Math.sin(mathRad + Math.PI / 2);
 
     // 4. Calculate the 4 corners relative to (cx, cy)
     // Inner points (Base) lie on the Main Circle.
@@ -63,8 +63,8 @@ export const calculateRadialBranchPath = (
     // Geometry: A right triangle formed by (0,0), the wall projection, and the intersection point.
     // Hypotenuse = mainR. One leg = safeBranchR.
     // Adjacent leg (distance along centerline) = sqrt(mainR^2 - safeBranchR^2).
-    
-    const distToBaseCenter = Math.sqrt(mainR*mainR - safeBranchR*safeBranchR);
+
+    const distToBaseCenter = Math.sqrt(mainR * mainR - safeBranchR * safeBranchR);
     const distToEndCenter = mainR + stickOut;
 
     // Point calculations
@@ -89,7 +89,7 @@ export const calculateRadialBranchPath = (
     // Let's trace: BaseLeft -> TopLeft -> TopRight -> BaseRight.
     // To close BaseRight -> BaseLeft, we follow the main circle.
     // Since p1 and p4 are on the circle, we use an Arc command.
-    
+
     // Determine Sweep Flag:
     // If the branch is pointing OUT, the circle arc connecting the base points usually bows "inward" relative to the branch (convex main pipe).
     // Actually, visually in 2D section, the connection is the chord line (p1 to p4) if it's a straight cut, 
@@ -97,26 +97,32 @@ export const calculateRadialBranchPath = (
     // Correct SVG Arc: A rx ry rot large_arc sweep endX endY
     // We want the arc to bow *away* from the center of the main pipe.
     // From p4 to p1.
-    const sweep = 1; 
+    const sweep = 1;
 
     const path = `M${p1.x},${p1.y} L${p2.x},${p2.y} L${p3.x},${p3.y} L${p4.x},${p4.y} A${mainR},${mainR} 0 0,${sweep} ${p1.x},${p1.y} Z`;
 
     // 6. Flange Path (at the end face)
     let flangePath = "";
     if (isTap) {
-        const fh = 5;
-        const fw = (branchR * 2) + 8; // Flange width relative to diameter
-        const hfw = fw/2;
-        
-        // Back of flange (where it touches pipe neck)
-        const fBackCenter = { x: cx + (distToEndCenter - fh) * cos, y: cy + (distToEndCenter - fh) * sin };
-        
-        const f1 = { x: endCenter.x + hfw*pCos, y: endCenter.y + hfw*pSin }; // Face Top Left
-        const f2 = { x: fBackCenter.x + hfw*pCos, y: fBackCenter.y + hfw*pSin }; // Back Top Left
-        const f3 = { x: fBackCenter.x - hfw*pCos, y: fBackCenter.y - hfw*pSin }; // Back Top Right
-        const f4 = { x: endCenter.x - hfw*pCos, y: endCenter.y - hfw*pSin }; // Face Top Right
-        
-        flangePath = `M${f1.x},${f1.y} L${f2.x},${f2.y} L${f3.x},${f3.y} L${f4.x},${f4.y} Z`;
+        const leg = 10;
+        const thk = 4;
+        const fw = (safeBranchR * 2) + 16; // Flange width relative to diameter
+        const hfw = fw / 2;
+
+        const fOut = endCenter;
+        const fInThk = { x: endCenter.x - thk * cos, y: endCenter.y - thk * sin };
+        const fBack = { x: endCenter.x - leg * cos, y: endCenter.y - leg * sin };
+
+        const p1 = { x: fOut.x + hfw * pCos, y: fOut.y + hfw * pSin };
+        const p2 = { x: fInThk.x + hfw * pCos, y: fInThk.y + hfw * pSin };
+        const p3 = { x: fInThk.x + safeBranchR * pCos, y: fInThk.y + safeBranchR * pSin };
+        const p4 = { x: fBack.x + safeBranchR * pCos, y: fBack.y + safeBranchR * pSin };
+        const p5 = { x: fBack.x - safeBranchR * pCos, y: fBack.y - safeBranchR * pSin };
+        const p6 = { x: fInThk.x - safeBranchR * pCos, y: fInThk.y - safeBranchR * pSin };
+        const p7 = { x: fInThk.x - hfw * pCos, y: fInThk.y - hfw * pSin };
+        const p8 = { x: fOut.x - hfw * pCos, y: fOut.y - hfw * pSin };
+
+        flangePath = `M${p1.x},${p1.y} L${p2.x},${p2.y} L${p3.x},${p3.y} L${p4.x},${p4.y} L${p5.x},${p5.y} L${p6.x},${p6.y} L${p7.x},${p7.y} L${p8.x},${p8.y} Z`;
     }
 
     return {

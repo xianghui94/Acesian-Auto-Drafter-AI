@@ -88,9 +88,9 @@ export const generateBootTee = (params: DuctParams, activeField: string | null =
     const clMain = `<line x1="${xLeft - 10}" y1="${cy}" x2="${xRight + 10}" y2="${cy}" class="center-line" />`;
     const clBoot = `<line x1="${(xBootTopStart + xBootTopEnd) / 2}" y1="${yCollarTop - 10}" x2="${(xBootTopStart + xBootTopEnd) / 2}" y2="${yBot}" class="center-line" />`;
 
-    const f1 = drawFlange(xLeft, cy, V_D1, true);
-    const f2 = drawFlange(xRight, cy, V_D1, true);
-    const f3 = drawFlange((xBootTopStart + xBootTopEnd) / 2, yCollarTop, V_BootTopWidth, false);
+    const f1 = drawFlange(xLeft, cy, V_D1, true, 'normal', 'left');
+    const f2 = drawFlange(xRight, cy, V_D1, true, 'normal', 'right');
+    const f3 = drawFlange((xBootTopStart + xBootTopEnd) / 2, yCollarTop, V_BootTopWidth, false, 'normal', 'up');
 
     // --- Dimensions ---
     const offsetTop = yTop - yDimLevel;

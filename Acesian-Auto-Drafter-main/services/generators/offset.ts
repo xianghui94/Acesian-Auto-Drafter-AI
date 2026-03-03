@@ -77,8 +77,8 @@ export const generateOffset = (params: DuctParams, activeField: string | null = 
     const centerLinePath = `M${xL_Start},${cy1} L${xL_Stub},${cy1} L${xR_Stub},${cy2} L${xR_End},${cy2}`;
     const cLineSvg = `<path d="${centerLinePath}" class="phantom-line" />`;
 
-    const f1 = drawFlange(xL_Start, cy1, V_DIAM1, true);
-    const f2 = drawFlange(xR_End, cy2, V_DIAM2, true);
+    const f1 = drawFlange(xL_Start, cy1, V_DIAM1, true, 'normal', 'left');
+    const f2 = drawFlange(xR_End, cy2, V_DIAM2, true, 'normal', 'right');
 
     let remark1 = "";
     if (params.flangeRemark1) {

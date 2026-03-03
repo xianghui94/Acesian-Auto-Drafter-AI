@@ -123,8 +123,10 @@ export const ItemBuilder: React.FC<ItemBuilderProps> = ({ onSave, editingItem, i
             setMeta(prev => ({ ...prev, thickness: "0.9" }));
         } else if (componentType === ComponentType.SADDLE) {
             setMeta(prev => ({ ...prev, coating: "ETFE Coated", material: "SS304" }));
+        } else if (componentType === ComponentType.VOLUME_DAMPER || componentType === ComponentType.MULTIBLADE_DAMPER) {
+            setMeta(prev => ({ ...prev, thickness: "1.0" }));
         } else {
-            setMeta(prev => (prev.thickness === "3.0" ? { ...prev, thickness: "0.8" } : prev));
+            setMeta(prev => (["3.0", "1.0"].includes(prev.thickness) ? { ...prev, thickness: "0.8" } : prev));
         }
 
     }, [componentType]);
@@ -371,7 +373,7 @@ export const ItemBuilder: React.FC<ItemBuilderProps> = ({ onSave, editingItem, i
                                         onClick={() => { setComponentType(item.type); setIsSelectorOpen(false); }}
                                         className={`flex flex-col items-center p-2 rounded border hover:bg-blue-50 dark:hover:bg-cad-700 hover:border-blue-300 dark:hover:border-blue-500 transition-all ${componentType === item.type ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 ring-1 ring-blue-500' : 'border-cad-100 dark:border-cad-700'}`}
                                     >
-                                        <div className="w-full h-20 bg-white dark:bg-cad-900 mb-2 overflow-hidden flex items-center justify-center p-1 border border-cad-100 dark:border-cad-800 rounded">
+                                        <div className="w-full h-20 bg-white mb-2 overflow-hidden flex items-center justify-center p-1 border border-cad-100 dark:border-cad-800 rounded">
                                             {item.type === ComponentType.MANUAL ? (
                                                 <div className="text-[10px] text-cad-400 dark:text-cad-500 italic text-center px-1">Blank / Custom</div>
                                             ) : (
@@ -407,71 +409,74 @@ export const ItemBuilder: React.FC<ItemBuilderProps> = ({ onSave, editingItem, i
                 <div className="flex flex-col lg:flex-row h-full">
 
                     {/* Left: Inputs Panel */}
-                    <div className="flex-1 p-6 space-y-6 lg:border-r border-cad-100 dark:border-cad-700">
-                        <ValidationContext.Provider value={errors}>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {InputComponent ? (
-                                    <InputComponent
-                                        params={params}
-                                        onChange={handleParamChange}
-                                        onFocus={(id: string) => setActiveField(id)}
-                                        onBlur={() => setActiveField(null)}
-                                        onTapQtyChange={handleTapQtyChange}
-                                        onNptQtyChange={handleNptQtyChange}
-                                        onTapUpdate={handleTapUpdate}
-                                        onNptUpdate={handleNptUpdate}
-                                    />
-                                ) : (
-                                    <div className="col-span-full text-red-500">Component definition missing.</div>
-                                )}
-                            </div>
-
-                            <div className="border-t border-cad-100 dark:border-cad-700 pt-4">
-                                <label className="block text-xs font-bold text-cad-500 dark:text-cad-400 mb-2 uppercase tracking-wide">Metadata</label>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <TextInput label="Material" value={meta.material} onChange={v => setMeta(m => ({ ...m, material: v }))} />
-                                    <TextInput label="Thk" value={meta.thickness} onChange={v => setMeta(m => ({ ...m, thickness: v }))} />
-
-                                    <div className="flex flex-col gap-1.5">
-                                        <label className="block text-xs uppercase font-bold text-cad-700 dark:text-cad-300 tracking-wider">Coating</label>
-                                        <select
-                                            value={meta.coating}
-                                            onChange={(e) => setMeta(m => ({ ...m, coating: e.target.value }))}
-                                            className="w-full p-2.5 bg-white dark:bg-cad-800 border border-cad-300 dark:border-cad-600 rounded text-cad-900 dark:text-cad-100 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
-                                        >
-                                            <option value="Yes">Yes</option>
-                                            <option value="No">No</option>
-                                            <option value="N/A">N/A</option>
-                                            <option value="ETFE Coated">ETFE Coated</option>
-                                        </select>
-                                    </div>
-
-                                    <NumInput label="Qty" fieldId="qty" value={meta.qty} onChange={v => {
-                                        setMeta(m => ({ ...m, qty: v }));
-                                        setErrors(prev => { const n = new Set(prev); n.delete('qty'); return n; });
-                                    }} step={1} />
+                    <div className="flex-1 flex flex-col lg:border-r border-cad-100 dark:border-cad-700">
+                        <div className="flex-1 p-6 space-y-6 overflow-y-auto max-h-[60vh] custom-scrollbar">
+                            <ValidationContext.Provider value={errors}>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    {InputComponent ? (
+                                        <InputComponent
+                                            params={params}
+                                            onChange={handleParamChange}
+                                            onFocus={(id: string) => setActiveField(id)}
+                                            onBlur={() => setActiveField(null)}
+                                            onTapQtyChange={handleTapQtyChange}
+                                            onNptQtyChange={handleNptQtyChange}
+                                            onTapUpdate={handleTapUpdate}
+                                            onNptUpdate={handleNptUpdate}
+                                        />
+                                    ) : (
+                                        <div className="col-span-full text-red-500">Component definition missing.</div>
+                                    )}
                                 </div>
-                                <div className="grid grid-cols-4 gap-4 mt-4">
-                                    <div className="col-span-1">
-                                        <TextInput label="Tag No" value={meta.tagNo} onChange={v => setMeta(m => ({ ...m, tagNo: v }))} />
-                                    </div>
-                                    <div className="col-span-3">
+
+                                <div className="border-t border-cad-100 dark:border-cad-700 pt-4">
+                                    <label className="block text-xs font-bold text-cad-500 dark:text-cad-400 mb-2 uppercase tracking-wide">Metadata</label>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <TextInput label="Material" value={meta.material} onChange={v => setMeta(m => ({ ...m, material: v }))} />
+                                        <TextInput label="Thk" value={meta.thickness} onChange={v => setMeta(m => ({ ...m, thickness: v }))} />
+
                                         <div className="flex flex-col gap-1.5">
-                                            <label className="block text-xs uppercase font-bold text-cad-700 dark:text-cad-300 tracking-wider">Notes</label>
-                                            <input
-                                                type="text"
-                                                value={meta.notes}
-                                                onChange={(e) => setMeta(m => ({ ...m, notes: e.target.value }))}
+                                            <label className="block text-xs uppercase font-bold text-cad-700 dark:text-cad-300 tracking-wider">Coating</label>
+                                            <select
+                                                value={meta.coating}
+                                                onChange={(e) => setMeta(m => ({ ...m, coating: e.target.value }))}
                                                 className="w-full p-2.5 bg-white dark:bg-cad-800 border border-cad-300 dark:border-cad-600 rounded text-cad-900 dark:text-cad-100 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
-                                                placeholder="Manufacturing notes..."
-                                            />
+                                            >
+                                                <option value="Yes">Yes</option>
+                                                <option value="No">No</option>
+                                                <option value="N/A">N/A</option>
+                                                <option value="ETFE Coated">ETFE Coated</option>
+                                            </select>
+                                        </div>
+
+                                        <NumInput label="Qty" fieldId="qty" value={meta.qty} onChange={v => {
+                                            setMeta(m => ({ ...m, qty: v }));
+                                            setErrors(prev => { const n = new Set(prev); n.delete('qty'); return n; });
+                                        }} step={1} />
+                                    </div>
+                                    <div className="grid grid-cols-4 gap-4 mt-4">
+                                        <div className="col-span-1">
+                                            <TextInput label="Tag No" value={meta.tagNo} onChange={v => setMeta(m => ({ ...m, tagNo: v }))} />
+                                        </div>
+                                        <div className="col-span-3">
+                                            <div className="flex flex-col gap-1.5">
+                                                <label className="block text-xs uppercase font-bold text-cad-700 dark:text-cad-300 tracking-wider">Notes</label>
+                                                <input
+                                                    type="text"
+                                                    value={meta.notes}
+                                                    onChange={(e) => setMeta(m => ({ ...m, notes: e.target.value }))}
+                                                    className="w-full p-2.5 bg-white dark:bg-cad-800 border border-cad-300 dark:border-cad-600 rounded text-cad-900 dark:text-cad-100 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                                                    placeholder="Manufacturing notes..."
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </ValidationContext.Provider>
+                            </ValidationContext.Provider>
+                        </div>
 
-                        <div className="flex justify-end pt-4 gap-2">
+                        {/* Save Button Footer (Pinned) */}
+                        <div className="p-4 bg-gray-50 dark:bg-cad-850 border-t border-cad-200 dark:border-cad-700 flex justify-end gap-2 shrink-0">
                             {(editingItem || insertIndex !== null) && (
                                 <button
                                     onClick={onCancel}

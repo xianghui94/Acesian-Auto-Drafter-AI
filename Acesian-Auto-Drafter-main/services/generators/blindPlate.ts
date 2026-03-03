@@ -82,11 +82,10 @@ export const generateBlindPlate = (params: DuctParams, activeField: string | nul
         // Draw label at bottom center
         const labelY = cy + V_R_OD + 50;
         const textTop = labelY - 25;
-        const rimBot = cy + V_R_OD + 10;
-
+        const rimBot = cy + V_R_OD;
         barLabel = `
             <line x1="${cx}" y1="${textTop}" x2="${cx}" y2="${rimBot}" stroke="var(--svg-stroke)" stroke-width="1" />
-            <text x="${cx}" y="${labelY}" font-family="sans-serif" font-size="28" font-weight="bold" fill="var(--svg-stroke)" text-anchor="middle">${labelText}</text>
+            <text x="${cx}" y="${labelY}" class="large-title-text" fill="var(--svg-stroke)">${labelText}</text>
         `;
     }
 

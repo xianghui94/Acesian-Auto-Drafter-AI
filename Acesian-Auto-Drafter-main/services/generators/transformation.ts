@@ -60,8 +60,8 @@ export const generateTransformation = (params: DuctParams, activeField: string |
     const centerConnect = `<line x1="${xT1}" y1="${cy}" x2="${xT2}" y2="${cyRect}" class="phantom-line" />`;
 
     const path = `<path d="${contour}" class="line" />`;
-    const f1 = drawFlange(xLeft, cy, V_D, true);
-    const f2 = drawFlange(xRight, cyRect, V_S, true);
+    const f1 = drawFlange(xLeft, cy, V_D, true, 'normal', 'left');
+    const f2 = drawFlange(xRight, cyRect, V_S, true, 'normal', 'right');
 
     const dimD = drawDim(xLeft, yRoundTop, xLeft, yRoundBot, `Ø${params.d1 || 500}`, 'left', null, 'd1', activeField);
 

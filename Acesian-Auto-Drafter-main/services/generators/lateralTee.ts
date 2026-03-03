@@ -112,8 +112,8 @@ export const generateLateralTee = (params: DuctParams, activeField: string | nul
     };
     const clBranch = `<line x1="${clBranchStart.x}" y1="${clBranchStart.y}" x2="${clBranchEnd.x}" y2="${clBranchEnd.y}" class="center-line" />`;
 
-    const f1 = drawFlange(xLeft, cy, V_D1, true);
-    const f2 = drawFlange(xRight, cy, V_D1, true);
+    const f1 = drawFlange(xLeft, cy, V_D1, true, 'normal', 'left');
+    const f2 = drawFlange(xRight, cy, V_D1, true, 'normal', 'right');
     const f3 = drawRotatedFlange(pCenterEnd.x, pCenterEnd.y, V_D3, angleDeg);
 
     // --- Dimensions (Tightened Spacing) ---

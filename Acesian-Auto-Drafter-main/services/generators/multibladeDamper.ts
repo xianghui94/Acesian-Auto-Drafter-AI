@@ -8,19 +8,19 @@ export const generateMultibladeDamper = (params: DuctParams, activeField: string
 
     const cxLeft = 250; // Spaced out better (was 130)
     const cxRight = 550; // Spaced out better (was 360)
-    
-    const realL = params.length || 400; 
-    const V_HEIGHT = 225; 
-    const V_WIDTH = 110;   
+
+    const realL = params.length || 400;
+    const V_HEIGHT = 225;
+    const V_WIDTH = 110;
     const seg1 = V_WIDTH * 0.25;
     const seg2 = V_WIDTH * 0.50;
     const seg3 = V_WIDTH * 0.25;
-    
+
     // Left View (Side View)
-    const xL = cxLeft - V_WIDTH/2;
-    const xR = cxLeft + V_WIDTH/2;
-    const yT = cy - V_HEIGHT/2;
-    const yB = cy + V_HEIGHT/2;
+    const xL = cxLeft - V_WIDTH / 2;
+    const xR = cxLeft + V_WIDTH / 2;
+    const yT = cy - V_HEIGHT / 2;
+    const yB = cy + V_HEIGHT / 2;
     const xM1 = xL + seg1;
     const xM2 = xM1 + seg2;
 
@@ -29,23 +29,23 @@ export const generateMultibladeDamper = (params: DuctParams, activeField: string
         <line x1="${xM1}" y1="${yT}" x2="${xM1}" y2="${yB}" class="line" stroke-width="1" />
         <line x1="${xM2}" y1="${yT}" x2="${xM2}" y2="${yB}" class="line" stroke-width="1" />
     `;
-    const flanges = drawFlange(xL, cy, V_HEIGHT, true) + drawFlange(xR, cy, V_HEIGHT, true);
-    
+    const flanges = drawFlange(xL, cy, V_HEIGHT, true, 'normal', 'left') + drawFlange(xR, cy, V_HEIGHT, true, 'normal', 'right');
+
     // Handle/Actuator Side View
     const actuatorSide = `
         <rect x="${cxLeft - 10}" y="${cy - 10}" width="${20}" height="${20}" fill="var(--svg-fill)" stroke="var(--svg-stroke)" />
         <line x1="${cxLeft}" y1="${cy}" x2="${cxLeft + 40}" y2="${cy + 10}" stroke="var(--svg-stroke)" stroke-width="3" />
         <circle cx="${cxLeft + 40}" cy="${cy + 10}" r="6" fill="var(--svg-stroke)" />
     `;
-    
+
     // Dimensions Side View
     const dimL = drawDim(xL, yT, xR, yT, `L=${realL}`, 'top', null, 'length', activeField);
-    
+
     // Right View (Front View)
-    const rOuter = (V_HEIGHT/2) + 12;
+    const rOuter = (V_HEIGHT / 2) + 12;
     const boxSize = V_HEIGHT + 35;
-    const dashedBox = `<rect x="${cxRight - boxSize/2}" y="${cy - boxSize/2}" width="${boxSize}" height="${boxSize}" class="hidden-line" />`;
-    const circle = `<circle cx="${cxRight}" cy="${cy}" r="${V_HEIGHT/2}" class="line" />`;
+    const dashedBox = `<rect x="${cxRight - boxSize / 2}" y="${cy - boxSize / 2}" width="${boxSize}" height="${boxSize}" class="hidden-line" />`;
+    const circle = `<circle cx="${cxRight}" cy="${cy}" r="${V_HEIGHT / 2}" class="line" />`;
     const cFlange = `<circle cx="${cxRight}" cy="${cy}" r="${rOuter}" class="flange" fill="none" />`;
     const rBolt = rOuter - 6;
     const bolts = `
@@ -57,24 +57,30 @@ export const generateMultibladeDamper = (params: DuctParams, activeField: string
     const numBlades = 6;
     let blades = "";
     const step = V_HEIGHT / numBlades;
-    for(let i=1; i<numBlades; i++) {
-        const y = (cy - V_HEIGHT/2) + i*step;
+    for (let i = 1; i < numBlades; i++) {
+        const y = (cy - V_HEIGHT / 2) + i * step;
         const dy = Math.abs(y - cy);
-        const R = V_HEIGHT/2;
-        const dx = Math.sqrt(R*R - dy*dy);
+        const R = V_HEIGHT / 2;
+        const dx = Math.sqrt(R * R - dy * dy);
         blades += `<line x1="${cxRight - dx}" y1="${y}" x2="${cxRight + dx}" y2="${y}" class="line" stroke-width="1" />`;
     }
-    const actX = cxRight + boxSize/2; 
+    const actX = cxRight + boxSize / 2;
     const actuatorFront = `
         <rect x="${actX}" y="${cy - 20}" width="${25}" height="${40}" fill="var(--svg-fill)" stroke="var(--svg-stroke)" />
         <line x1="${actX + 25}" y1="${cy}" x2="${actX + 45}" y2="${cy}" stroke="var(--svg-stroke)" stroke-width="3" />
         <line x1="${actX + 35}" y1="${cy}" x2="${actX + 55}" y2="${cy}" stroke="var(--svg-stroke)" stroke-width="3" /> 
-        <rect x="${actX+35}" y="${cy-20}" width="4" height="40" fill="var(--svg-stroke)" /> 
+        <rect x="${actX + 35}" y="${cy - 20}" width="4" height="40" fill="var(--svg-stroke)" /> 
     `;
-    const dimD = drawDim(cxRight + boxSize/2 + 5, cy - V_HEIGHT/2, cxRight + boxSize/2 + 5, cy + V_HEIGHT/2, `Ø${params.d1}`, 'right', null, 'd1', activeField);
+    const dimD = drawDim(cxRight + boxSize / 2 + 5, cy - V_HEIGHT / 2, cxRight + boxSize / 2 + 5, cy + V_HEIGHT / 2, `Ø${params.d1}`, 'right', null, 'd1', activeField);
+
+    // --- View Labels ---
+    const titles = `
+        <text x="${cxLeft}" y="${yB + 60}" text-anchor="middle" class="title-text">SIDE VIEW</text>
+        <text x="${cxRight}" y="${yB + 60}" text-anchor="middle" class="title-text">FRONT VIEW</text>
+    `;
 
     return createSvg(
-        dashedBox + cFlange + circle + bolts + blades + actuatorFront + dimD + rect + dividers + flanges + actuatorSide + dimL,
+        dashedBox + cFlange + circle + bolts + blades + actuatorFront + dimD + rect + dividers + flanges + actuatorSide + dimL + titles,
         VIEW_WIDTH, VIEW_HEIGHT
     );
 };

@@ -115,7 +115,7 @@ export const generateElbow = (params: DuctParams, activeField: string | null = n
   if (V_EXT1 > 0) seams += `<line x1="${xCurveStart}" y1="${y0}" x2="${xCurveStart}" y2="${y0 + V_D}" class="line" stroke-width="0.5" />`;
   if (V_EXT2 > 0) seams += `<line x1="${curveEndIn.x}" y1="${curveEndIn.y}" x2="${curveEndOut.x}" y2="${curveEndOut.y}" class="line" stroke-width="0.5" />`;
 
-  const f1 = drawFlange(xStart, y0 + V_D / 2, V_D, true);
+  const f1 = drawFlange(xStart, y0 + V_D / 2, V_D, true, 'normal', 'left');
   const endDeg = tanAngle * 180 / Math.PI;
   const f2 = drawRotatedFlange(finalC.x, finalC.y, V_D, endDeg);
 

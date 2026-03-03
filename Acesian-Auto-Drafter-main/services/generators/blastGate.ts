@@ -10,56 +10,56 @@ export const generateBlastGateDamper = (params: DuctParams, activeField: string 
     const cy = VIEW_HEIGHT / 2 + 30; // Shift down slightly to make room for handle
 
     const realD = params.d1 || 500;
-    const realL = params.length || 200; 
-    
-    const V_X = 320; 
-    const V_D = 290; 
-    const V_L = 50; 
-    
+    const realL = params.length || 200;
+
+    const V_X = 320;
+    const V_D = 290;
+    const V_L = 50;
+
     // --- Right View (Front) ---
     const rightView = `
-        <rect x="${cxRight - V_X/2}" y="${cy - V_X/2}" width="${V_X}" height="${V_X}" class="line" />
-        <circle cx="${cxRight}" cy="${cy}" r="${V_D/2}" class="line" />
+        <rect x="${cxRight - V_X / 2}" y="${cy - V_X / 2}" width="${V_X}" height="${V_X}" class="line" />
+        <circle cx="${cxRight}" cy="${cy}" r="${V_D / 2}" class="line" />
     `;
-    
-    const V_PCD = V_D + ((V_X - V_D) * 0.5); 
-    const pcdCircle = `<circle cx="${cxRight}" cy="${cy}" r="${V_PCD/2}" class="phantom-line" />`;
-    
+
+    const V_PCD = V_D + ((V_X - V_D) * 0.5);
+    const pcdCircle = `<circle cx="${cxRight}" cy="${cy}" r="${V_PCD / 2}" class="phantom-line" />`;
+
     const numBolts = 16;
     let bolts = "";
-    for(let i=0; i<numBolts; i++) {
-        const rad = (i * (360/numBolts)) * Math.PI / 180;
-        const bx = cxRight + (V_PCD/2) * Math.cos(rad);
-        const by = cy + (V_PCD/2) * Math.sin(rad);
+    for (let i = 0; i < numBolts; i++) {
+        const rad = (i * (360 / numBolts)) * Math.PI / 180;
+        const bx = cxRight + (V_PCD / 2) * Math.cos(rad);
+        const by = cy + (V_PCD / 2) * Math.sin(rad);
         bolts += `<circle cx="${bx}" cy="${by}" r="2.5" fill="none" stroke="var(--svg-stroke)" stroke-width="1" />`;
     }
-    
+
     const handleW = V_X * 0.6;
     const handleH = 30;
-    const handleY = cy - V_X/2 - handleH;
+    const handleY = cy - V_X / 2 - handleH;
     const handleFront = `
-        <polyline points="${cxRight - handleW/2},${cy - V_X/2} ${cxRight - handleW/2},${handleY} ${cxRight + handleW/2},${handleY} ${cxRight + handleW/2},${cy - V_X/2}" class="line" fill="none" />
-        <line x1="${cxRight - handleW/2 + 5}" y1="${handleY + 5}" x2="${cxRight + handleW/2 - 5}" y2="${handleY + 5}" class="line" stroke-width="1" />
+        <polyline points="${cxRight - handleW / 2},${cy - V_X / 2} ${cxRight - handleW / 2},${handleY} ${cxRight + handleW / 2},${handleY} ${cxRight + handleW / 2},${cy - V_X / 2}" class="line" fill="none" />
+        <line x1="${cxRight - handleW / 2 + 5}" y1="${handleY + 5}" x2="${cxRight + handleW / 2 - 5}" y2="${handleY + 5}" class="line" stroke-width="1" />
     `;
 
     const centerLinesRight = `
-        <line x1="${cxRight - V_X/2 - 20}" y1="${cy}" x2="${cxRight + V_X/2 + 20}" y2="${cy}" class="phantom-line" />
-        <line x1="${cxRight}" y1="${cy - V_X/2 - 20}" x2="${cxRight}" y2="${cy + V_X/2 + 20}" class="phantom-line" />
+        <line x1="${cxRight - V_X / 2 - 20}" y1="${cy}" x2="${cxRight + V_X / 2 + 20}" y2="${cy}" class="phantom-line" />
+        <line x1="${cxRight}" y1="${cy - V_X / 2 - 20}" x2="${cxRight}" y2="${cy + V_X / 2 + 20}" class="phantom-line" />
     `;
 
     // Diameter pointing to circle
-    const labelRad = V_D/2;
+    const labelRad = V_D / 2;
     const angle = 45 * Math.PI / 180;
     const pOnCircleX = cxRight + labelRad * Math.cos(angle);
     const pOnCircleY = cy + labelRad * Math.sin(angle);
-    const pOutsideX = cxRight + (V_X/2 + 40) * Math.cos(angle);
-    const pOutsideY = cy + (V_X/2 + 40) * Math.sin(angle);
-    
+    const pOutsideX = cxRight + (V_X / 2 + 40) * Math.cos(angle);
+    const pOutsideY = cy + (V_X / 2 + 40) * Math.sin(angle);
+
     // Custom drawing for radial dim with highlight support
     const isDActive = activeField === 'd1';
     const dColorClass = isDActive ? "dim-line highlight" : "dim-line";
     const dTextClass = isDActive ? "dim-text highlight" : "dim-text";
-    
+
     const dimDRight = `
         <line x1="${pOutsideX}" y1="${pOutsideY}" x2="${pOnCircleX}" y2="${pOnCircleY}" class="${dColorClass}" />
         <polygon points="${pOnCircleX},${pOnCircleY} ${pOnCircleX + 10},${pOnCircleY - 4} ${pOnCircleX + 10},${pOnCircleY + 4}" fill="${isDActive ? '#2563eb' : 'red'}" transform="rotate(45, ${pOnCircleX}, ${pOnCircleY})" />
@@ -67,36 +67,36 @@ export const generateBlastGateDamper = (params: DuctParams, activeField: string 
     `;
 
     // --- Left View (Side) ---
-    const xL = cxLeft - V_L/2;
-    const xR = cxLeft + V_L/2;
-    const yT = cy - V_D/2; 
-    const yB = cy + V_D/2;
-    
-    const bodySide = `<rect x="${xL}" y="${yT}" width="${V_L}" height="${V_D}" class="line" fill="none" />`;
-    
-    const f1 = drawFlange(xL, cy, V_D, true);
-    const f2 = drawFlange(xR, cy, V_D, true);
+    const xL = cxLeft - V_L / 2;
+    const xR = cxLeft + V_L / 2;
+    const yT = cy - V_D / 2;
+    const yB = cy + V_D / 2;
 
-    const bladeHousingH = V_X/2; 
+    const bodySide = `<rect x="${xL}" y="${yT}" width="${V_L}" height="${V_D}" class="line" fill="none" />`;
+
+    const f1 = drawFlange(xL, cy, V_D, true, 'normal', 'left');
+    const f2 = drawFlange(xR, cy, V_D, true, 'normal', 'right');
+
+    const bladeHousingH = V_X / 2;
     const housingTop = cy - bladeHousingH;
     const housingW = Math.max(15, V_L * 0.4);
-    
-    const housing = `<rect x="${cxLeft - housingW/2}" y="${housingTop}" width="${housingW}" height="${bladeHousingH - V_D/2}" class="line" fill="var(--svg-fill)" />`;
-    
+
+    const housing = `<rect x="${cxLeft - housingW / 2}" y="${housingTop}" width="${housingW}" height="${bladeHousingH - V_D / 2}" class="line" fill="var(--svg-fill)" />`;
+
     const handleStemH = 30;
     const handleStemTop = housingTop - handleStemH;
-    
+
     const handleSide = `
         <line x1="${cxLeft}" y1="${housingTop}" x2="${cxLeft}" y2="${handleStemTop}" class="line" stroke-width="2" />
-        <polyline points="${cxLeft},${handleStemTop} ${cxLeft+10},${handleStemTop} ${cxLeft+10},${handleStemTop-15}" class="line" fill="none" />
+        <polyline points="${cxLeft},${handleStemTop} ${cxLeft + 10},${handleStemTop} ${cxLeft + 10},${handleStemTop - 15}" class="line" fill="none" />
     `;
-    
+
     const dimLLeft = drawDim(xL, yB, xR, yB, `L=${realL}`, 'bottom', 30, 'length', activeField);
     const dimDLeft = drawDim(xL - 20, yT, xL - 20, yB, `Ø${realD}`, 'left', 10, 'd1', activeField);
-    
+
     const titles = `
-        <text x="${cxLeft}" y="${VIEW_HEIGHT - 20}" font-weight="bold" text-anchor="middle" font-size="18" text-decoration="underline">SIDE VIEW</text>
-        <text x="${cxRight}" y="${VIEW_HEIGHT - 20}" font-weight="bold" text-anchor="middle" font-size="18" text-decoration="underline">FRONT VIEW</text>
+        <text x="${cxLeft}" y="${VIEW_HEIGHT - 20}" class="title-text">SIDE VIEW</text>
+        <text x="${cxRight}" y="${VIEW_HEIGHT - 20}" class="title-text">FRONT VIEW</text>
     `;
 
     return createSvg(

@@ -48,9 +48,9 @@ export const generateTee = (params: DuctParams, activeField: string | null = nul
     Z
   `;
 
-  const f1 = drawFlange(xL_Left, cy, V_MD, true);
-  const f2 = drawFlange(xR_Left, cy, V_MD, true);
-  const f3 = drawFlange(cxLeft, yBranchTop, V_BD, false);
+  const f1 = drawFlange(xL_Left, cy, V_MD, true, 'normal', 'left');
+  const f2 = drawFlange(xR_Left, cy, V_MD, true, 'normal', 'right');
+  const f3 = drawFlange(cxLeft, yBranchTop, V_BD, false, 'normal', 'up');
 
   let remark1 = "";
   if (params.flangeRemark1) {
@@ -84,7 +84,7 @@ export const generateTee = (params: DuctParams, activeField: string | null = nul
   const circleRight = `<circle cx="${cxRight}" cy="${cy}" r="${V_MD / 2}" class="line" />`;
   const geo = calculateRadialBranchPath(cxRight, cy, V_MD / 2, V_BD / 2, 270, V_NECK, false);
   const branchRight = `<path d="${geo.path}" class="line" fill="var(--svg-fill)" />`;
-  const f4 = drawFlange(geo.endPoint.x, geo.endPoint.y, V_BD, true);
+  const f4 = drawFlange(geo.endPoint.x, geo.endPoint.y, V_BD, true, 'normal', 'left');
 
   const dimBd = drawDim(geo.endPoint.x, geo.endPoint.y - V_BD / 2, geo.endPoint.x, geo.endPoint.y + V_BD / 2, `Ø${Bd}`, 'left', null, 'tap_d', activeField);
 
@@ -98,8 +98,8 @@ export const generateTee = (params: DuctParams, activeField: string | null = nul
 
   const cxSideViewText = (geo.endPoint.x + cxRight + V_MD / 2) / 2;
   const titles = `
-    <text x="${cxLeft}" y="${VIEW_HEIGHT - 30}" font-weight="bold" text-anchor="middle" font-size="18" text-decoration="underline">TOP VIEW</text>
-    <text x="${cxSideViewText}" y="${VIEW_HEIGHT - 30}" font-weight="bold" text-anchor="middle" font-size="18" text-decoration="underline">SIDE VIEW</text>
+    <text x="${cxLeft}" y="${VIEW_HEIGHT - 30}" class="title-text">TOP VIEW</text>
+    <text x="${cxSideViewText}" y="${VIEW_HEIGHT - 30}" class="title-text">SIDE VIEW</text>
   `;
 
   return createSvg(
