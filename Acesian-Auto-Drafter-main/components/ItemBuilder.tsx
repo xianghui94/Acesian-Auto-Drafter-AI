@@ -25,6 +25,9 @@ export const ItemBuilder: React.FC<ItemBuilderProps> = ({ onSave, editingItem, i
     const [activeField, setActiveField] = useState<string | null>(null);
     const [errors, setErrors] = useState<Set<string>>(new Set());
 
+    // Allow user to manually override the auto-generated description
+    const [descriptionOverride, setDescriptionOverride] = useState<string | null>(null);
+
     // Track modified fields to prevent auto-calc overrides
     const [dirtyFields, setDirtyFields] = useState<Set<string>>(new Set());
 
@@ -92,6 +95,15 @@ export const ItemBuilder: React.FC<ItemBuilderProps> = ({ onSave, editingItem, i
                 tagNo: editingItem.tagNo,
                 notes: editingItem.notes
             });
+
+            // If the item's saved description differs from the auto-generated one, preserve it.
+            const autoDesc = generateDescription(editingItem.componentType, editingItem.params);
+            if (editingItem.description && editingItem.description !== autoDesc) {
+                setDescriptionOverride(editingItem.description);
+            } else {
+                setDescriptionOverride(null);
+            }
+
             setIsConfigOpen(true);
             setIsSelectorOpen(false);
             // Assume all fields in an edited item are "dirty" (user intent preserved)
@@ -105,6 +117,7 @@ export const ItemBuilder: React.FC<ItemBuilderProps> = ({ onSave, editingItem, i
 
         // Reset dirty fields
         setDirtyFields(new Set());
+        setDescriptionOverride(null); // Reset manual description on type change
 
         // 1. Check if we have a saved config for this type
         if (lastUsedParams.current[componentType]) {
@@ -317,9 +330,12 @@ export const ItemBuilder: React.FC<ItemBuilderProps> = ({ onSave, editingItem, i
             return; // Block save if validation fails
         }
 
-        const description = generateDescription(componentType, params);
-        onSave({ componentType, params, ...meta, description, sketchSvg: previewSvg });
-        if (!editingItem) setMeta(prev => ({ ...prev, tagNo: "", qty: 1, notes: "" }));
+        const finalDescription = descriptionOverride !== null ? descriptionOverride : generateDescription(componentType, params);
+        onSave({ componentType, params, ...meta, description: finalDescription, sketchSvg: previewSvg });
+        if (!editingItem) {
+            setMeta(prev => ({ ...prev, tagNo: "", qty: 1, notes: "" }));
+            setDescriptionOverride(null);
+        }
         setErrors(new Set());
     };
 
@@ -431,6 +447,15 @@ export const ItemBuilder: React.FC<ItemBuilderProps> = ({ onSave, editingItem, i
 
                                 <div className="border-t border-cad-100 dark:border-cad-700 pt-4">
                                     <label className="block text-xs font-bold text-cad-500 dark:text-cad-400 mb-2 uppercase tracking-wide">Metadata</label>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                        <div className="col-span-full">
+                                            <TextInput
+                                                label="Description (Auto-Generated unless edited)"
+                                                value={descriptionOverride !== null ? descriptionOverride : generateDescription(componentType, params)}
+                                                onChange={v => setDescriptionOverride(v)}
+                                            />
+                                        </div>
+                                    </div>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         <TextInput label="Material" value={meta.material} onChange={v => setMeta(m => ({ ...m, material: v }))} />
                                         <TextInput label="Thk" value={meta.thickness} onChange={v => setMeta(m => ({ ...m, thickness: v }))} />
