@@ -38,7 +38,7 @@ export const generateStraight = (params: DuctParams, activeField: string | null 
   }
 
   const dimL = drawDim(x1, yBot, x2, yBot, `L=${realL}`, 'bottom', null, 'length', activeField);
-  const dimD = drawDim(x2, yTop, x2, yBot, `D=${realD}`, 'right', null, 'd1', activeField);
+  const dimD = drawDim(x2, yTop, x2, yBot, `Ø${realD}`, 'right', null, 'd1', activeField);
 
   return createSvg(path + f1 + f2 + dimL + dimD + remark1 + remark2, VIEW_WIDTH, VIEW_HEIGHT);
 };

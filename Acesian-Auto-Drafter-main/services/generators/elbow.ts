@@ -133,7 +133,7 @@ export const generateElbow = (params: DuctParams, activeField: string | null = n
   }
 
   // Highlightable Dimensions
-  const dimD = drawDim(xStart, y0, xStart, y0 + V_D, `D=${D_real}`, 'left', null, 'd1', activeField);
+  const dimD = drawDim(xStart, y0, xStart, y0 + V_D, `Ø${D_real}`, 'left', null, 'd1', activeField);
 
   let dimExt1 = "";
   if (V_EXT1 > 10 || extReal1 > 0) {

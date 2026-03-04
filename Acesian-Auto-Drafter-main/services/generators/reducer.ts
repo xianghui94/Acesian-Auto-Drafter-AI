@@ -141,8 +141,8 @@ export const generateReducer = (params: DuctParams, activeField: string | null =
 
     const yDimBot = Math.max(y1Bot, y2Bot);
     const dimL = drawDim(xLeft, yDimBot, xRight, yDimBot, `L=${realL}`, 'bottom', 60, 'length', activeField);
-    const dimD1 = drawDim(xLeft, y1Top, xLeft, y1Bot, `D1=${realD1}`, 'left', null, 'd1', activeField);
-    const dimD2 = drawDim(xRight, y2Top, xRight, y2Bot, `D2=${realD2}`, 'right', null, 'd2', activeField);
+    const dimD1 = drawDim(xLeft, y1Top, xLeft, y1Bot, `Ø${realD1}`, 'left', null, 'd1', activeField);
+    const dimD2 = drawDim(xRight, y2Top, xRight, y2Bot, `Ø${realD2}`, 'right', null, 'd2', activeField);
 
     let dimRC1 = "";
     let dimRC2 = "";
