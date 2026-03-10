@@ -396,9 +396,9 @@ const HeaderRow = ({ label1, val1, label2, val2, label3, val3, className, val2Cl
           {/* Col 4 (Short) */}
           <div className="w-[30mm] flex-none p-1 border-r border-black truncate h-full flex items-center">{val2}</div>
           {/* Col 5 */}
-          <div className="w-[30mm] flex-none p-1 border-r border-black font-bold truncate bg-gray-50 h-full flex items-center">{label3}:</div>
+          <div className="w-[22mm] flex-none p-1 border-r border-black font-bold truncate bg-gray-50 h-full flex items-center">{label3}:</div>
           {/* Col 6 */}
-          <div className="w-[25mm] flex-none p-1 truncate h-full flex items-center">{val3}</div>
+          <div className="w-[33mm] flex-none p-1 truncate h-full flex items-center">{val3}</div>
         </>
       ) : (
         /* Col 4 (Long) */
